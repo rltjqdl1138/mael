@@ -14,7 +14,7 @@ export default class HeaderContainer extends Component {
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>
-                        MAEL MUSIC
+                        MAEL
                     </Text>
                 </View>
                 <View style={styles.searchContainer}>
