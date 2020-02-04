@@ -1,8 +1,11 @@
 import React, {Component} from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
-import HeaderContainer from '../containers/HeaderContainer'
 import { connect } from 'react-redux'
 import { AthenticationActions, SidebarActions } from '../store/actionCreator'
+
+
+import HeaderContainer from '../containers/HeaderContainer'
+import MainContainer from '../containers/MainContainer'
 class MainPage extends Component {
     handleLogin = ()=>{
         const input = {
@@ -41,16 +44,21 @@ class MainPage extends Component {
                         </Text>
                     </View>
                 </View>
+
+
                 <View style={styles.mainscreenContainer}>
-                    <Text>
-                        Mai n
-                    </Text>
+                    <MainContainer />
                 </View>
+
+
                 <View style={styles.footerContainer}>
                     <Text>
                         Footer
                     </Text>
                 </View>
+
+
+
                 <View style={styles.sidebarContainer} width={isSidebarOpen?'50%':0}>
                     <Text>
                         {isLogin?"Welcom! "+{username}:"sign up?"}
@@ -60,17 +68,6 @@ class MainPage extends Component {
         )
     }
 }
-/*
-class Temp extends Component{
-    render(){
-        const token = 
-        return(
-            <View>
-
-            </View>
-        )
-    }
-}*/
 
 const styles = StyleSheet.create({
     container: {
