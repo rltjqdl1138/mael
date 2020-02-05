@@ -34,7 +34,9 @@ class MainPage extends Component {
         return(
             <View style={styles.container}>
                 <View style={styles.headerContainer}>
+                    
                     <View style={styles.iphonPadding} />
+
                     <View style={styles.header}>
                         <HeaderContainer handleSidebar={this.toggleSidebar}/>
                     </View>
@@ -64,6 +66,7 @@ class MainPage extends Component {
                         {isLogin?"Welcom! "+{username}:"sign up?"}
                     </Text>
                 </View>
+                
             </View>
         )
     }

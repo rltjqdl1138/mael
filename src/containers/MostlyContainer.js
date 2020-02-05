@@ -12,6 +12,7 @@ class MostlyContainer extends Component{
         this.handleUpdate()
     }
     handleUpdate(){
+        // need Fetch 
         const list = [{
                 MID:1,
                 imageURL:'image',
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        height: '100%',
+        height: 320,
         paddingTop: 15
     },
     

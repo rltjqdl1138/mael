@@ -67,6 +67,7 @@ export default class Mostly extends Component{
                     const {MID, imageURL, title} = mostly
                     return (
                         <MostlyItem
+                            key={MID}
                             MID={MID}
                             imageURL={imageURL}
                             title={title}
