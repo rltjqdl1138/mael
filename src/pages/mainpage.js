@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Animated, Dimensions } from 'react-native';
 import { connect } from 'react-redux'
 import { AthenticationActions, SidebarActions } from '../store/actionCreator'
 
-
 import HeaderContainer from '../containers/HeaderContainer'
 import MainContainer from '../containers/MainContainer'
+
+const { width } = Dimensions.get('window');
+
 class MainPage extends Component {
     handleLogin = ()=>{
         const input = {
@@ -66,7 +68,7 @@ class MainPage extends Component {
                         {isLogin?"Welcom! "+{username}:"sign up?"}
                     </Text>
                 </View>
-                
+
             </View>
         )
     }
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
         left: 0,
         borderTopWidth: 3,
         borderTopColor: '#777',
-        backgroundColor: '#faf'
+        backgroundColor: '#ccc'
     }
 
 });
