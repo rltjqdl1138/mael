@@ -6,11 +6,12 @@ import ThemeContainer from './ThemeContainer'
 
 export default class MainContainer extends Component{
     render(){
+        const {navigator, option} = this.props
         return(
             <View style={styles.container}>
                 <ScrollView style={styles.scroll}>
-                    <MostlyContainer />
-                    <ThemeContainer />
+                    <MostlyContainer navigator={navigator}/>
+                    <ThemeContainer navigator={navigator}/>
                 </ScrollView>
             </View>
         )

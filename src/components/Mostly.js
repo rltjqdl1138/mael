@@ -5,8 +5,14 @@ import { StyleSheet, Image, Text, View, TouchableOpacity,ScrollView } from 'reac
 
 class MostlyItem extends Component {
     render(){
+        const {navigator} = this.props
+        const conf = {
+            title:this.props.title,
+            temp:'aaa'
+        }
+        //onPress={navigator.push('PlayingContainer',option)}
         return(
-            <TouchableOpacity style={itemStyle.container}>
+            <TouchableOpacity style={itemStyle.container} onPress={()=>{navigator.push('PlayingContainer',conf)}}>
 
                 <View style={itemStyle.imageContainer}>
                     <Image style={itemStyle.image}
@@ -59,7 +65,7 @@ const itemStyle = StyleSheet.create({
 
 export default class Mostly extends Component{
     render(){
-        const {mostlylist} = this.props
+        const {mostlylist, navigator} = this.props
         const mostlyItems = !mostlylist ?
             (<Text> Blank </Text>):
             mostlylist.map(
@@ -71,6 +77,7 @@ export default class Mostly extends Component{
                             MID={MID}
                             imageURL={imageURL}
                             title={title}
+                            navigator={navigator}
                         />
                     )
                 }

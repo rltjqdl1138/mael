@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class HeaderContainer extends Component {
     render(){
-        const {handleSidebar} = this.props
+        const {handleSidebar, handleNavPop} = this.props
         return(
             <View style={styles.container}>
                 <TouchableOpacity style={styles.menuContainer} onPress={handleSidebar}>
@@ -12,11 +12,11 @@ export default class HeaderContainer extends Component {
                         source={require('../image/menu.jpg')}
                     />
                 </TouchableOpacity>
-                <View style={styles.titleContainer}>
+                <TouchableOpacity style={styles.titleContainer} onPress={()=>{handleNavPop()}}>
                     <Text style={styles.titleText}>
                         MAEL
                     </Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.searchContainer}>
                     <Image
                         style={styles.searchImage}
@@ -35,7 +35,8 @@ const styles = StyleSheet.create({
         height:'100%',
         backgroundColor: '#fff',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        padding: 7
     },
 
     // MENU BUTTON
@@ -49,8 +50,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },menuImage:{
-        width:'60%',
-        height:'60%',
+        width:'100%',
+        height:'100%',
         resizeMode:'cover'
     },
 

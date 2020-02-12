@@ -5,6 +5,10 @@ import { AthenticationActions, NavigatorActions } from '../store/actionCreator'
 
 import HeaderContainer from '../containers/HeaderContainer'
 import MainContainer from '../containers/MainContainer'
+import PlayingContainer from '../containers/PlayingContainer';
+import SignupContainer from '../containers/SignupContainer'
+
+
 import Sidebar from '../components/Sidebar'
 import {Navigator, Route} from '../navigator/navigator'
 
@@ -27,6 +31,14 @@ class MainPage extends Component {
         else
             navList['mainscreen'].push('Sidebar')
     }
+    handleNavPop = (name)=>{
+        const {navList} = this.props
+
+        if(!navList['mainscreen'])
+            console.warn('handleSidebar: navList null')
+        else
+            navList['mainscreen'].pop(name)
+    }
     render(){
         const {isLogin, token, username, isSidebarOpen, navList} = this.props
         return(
@@ -38,6 +50,7 @@ class MainPage extends Component {
                     <View style={styles.header}>
                         <HeaderContainer
                             handleSidebar={this.handleSidebar}
+                            handleNavPop={this.handleNavPop}
                         />
                     </View>
                     <View style={styles.playingbar}>
@@ -53,6 +66,8 @@ class MainPage extends Component {
                     <Navigator id='mainscreen'>
                         <Route name="MainContainer" component={MainContainer} />
                         <Route name="Sidebar" component={Sidebar} />
+                        <Route name="PlayingContainer" component={PlayingContainer} />
+                        <Route name="SignupContainer" component={SignupContainer} />
                     </Navigator>
                 </View>
                 
@@ -66,7 +81,6 @@ class MainPage extends Component {
         )
     }
 }
-
 const styles = StyleSheet.create({
     container: {
         width:'100%',

@@ -8,7 +8,7 @@ class ThemeItem extends Component{
 
                 <View style={itemStyle.imageContainer}>
                     <Image style={itemStyle.image}
-                        source={require('../image/owl.jpg')}
+                        source={require('../image/class.jpeg')}
                     />
                 </View>
 
