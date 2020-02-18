@@ -7,6 +7,7 @@ import Mainpage from './src/pages/mainpage'
 export default function App() {
     return (
         <Provider store={store}>
+            <View style={styles.iphonePadding} />
             <View style={styles.container}>
                 <Mainpage />
             </View>
@@ -16,9 +17,12 @@ export default function App() {
 
 const styles = StyleSheet.create({
         container: {
-        flex: 1,
+        flex: 29,
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
     },
+    iphonePadding:{
+        flex:1
+    }
 });

@@ -1,21 +1,18 @@
 import React, {Component} from 'react';
 import { StyleSheet, Text, View, Animated, Dimensions, Button } from 'react-native';
 import { connect } from 'react-redux'
-import { AthenticationActions, SidebarActions } from '../store/actionCreator'
+import { AthenticationActions, NavigatorActions } from '../store/actionCreator'
 
 import HeaderContainer from '../containers/HeaderContainer'
 import MainContainer from '../containers/MainContainer'
 import PlayingContainer from '../containers/PlayingContainer';
 import SignupContainer from '../containers/SignupContainer'
-import PlayingPage from './PlayingPage'
-import SidebarPage from './SidebarPage'
+
 
 import Sidebar from '../components/Sidebar'
 import {Navigator, Route} from '../navigator/navigator'
 
 class MainPage extends Component {
-
-    screenHeight = Dimensions.get('window').height
     handleLogin = ()=>{
         const input = {
             token: 'asdfasdfasdf',
@@ -26,6 +23,13 @@ class MainPage extends Component {
     }
     handleLogout = ()=>{
         AthenticationActions.logout()
+    }
+    handleSidebar = ()=>{
+        const {navList} = this.props
+        if(!navList['mainscreen'])
+            console.warn('handleSidebar: navList null')
+        else
+            navList['mainscreen'].push('Sidebar')
     }
     handleNavPop = (name)=>{
         const {navList} = this.props
@@ -39,53 +43,76 @@ class MainPage extends Component {
         const {isLogin, token, username, isSidebarOpen, navList} = this.props
         return(
             <View style={styles.container}>
-                
-                <View style={styles.header}>
-                    <HeaderContainer handleSidebar={this.props.handler.open} />
-                </View>
-                <View style={styles.mainscreenContainer}>
-                    <MainContainer></MainContainer>
+                <View style={styles.headerContainer}>
+                    
+                    <View style={styles.iphonPadding} />
+
+                    <View style={styles.header}>
+                        <HeaderContainer
+                            handleSidebar={this.handleSidebar}
+                            handleNavPop={this.handleNavPop}
+                        />
+                    </View>
+                    <View style={styles.playingbar}>
+                        <Text width='100%' height='0%'>
+                            재생바 들어갈 
+                        </Text>
+                    </View>
                 </View>
 
-                <PlayingPage headerPos={this.screenHeight*0.1212}/>
-                <SidebarPage
-                    isLogin={isLogin}
-                    handleLogin={this.handleLogin}
-                    handleLogout={this.handleLogout}
-                    username={username}
-                    token={token}
-                />
+                
+                <View style={styles.mainscreenContainer}>
+
+                    <Navigator id='mainscreen'>
+                        <Route name="MainContainer" component={MainContainer} />
+                        <Route name="Sidebar" component={Sidebar} />
+                        <Route name="SignupContainer" component={SignupContainer} />
+                    </Navigator>
+                </View>
             </View>
         )
     }
 }
-
 const styles = StyleSheet.create({
     container: {
         width:'100%',
         height:'100%',
         backgroundColor: '#fff',
         alignItems: 'center',
+        justifyContent: 'center',
     },
     
     // HEADER
-    header:{
+    headerContainer:{
+        flex:3,
+        width:'100%'
+    },iphonPadding:{
+        height:30,
+        width:'100%',
+        backgroundColor:'#fff'
+    },header:{
         flex:1,
         width:'100%',
-        backgroundColor:'#f00',
-        borderWidth:1,
-        borderColor:'#f00'
+        backgroundColor:'#f00'
+    },playingbar:{
+        height:30,
+        width:'100%',
+        backgroundColor:'#fff'
     },
-
+    
     // MAIN SCREEN
     mainscreenContainer:{
-        flex:10,
+        flex:15,
         width:'100%',
-        borderColor:'#f00',
-        backgroundColor:'#fff',
+        borderColor:'#000',
         borderWidth:1
     },
 
+    // FOOTER
+    footerContainer:{
+        flex:1,
+        width:'100%'
+    },
 
     // SIDE BAR
     sidebarContainer:{
@@ -106,9 +133,8 @@ export default connect(
         isLogin: state.athentication.isLogin,
         token: state.athentication.token,
         username: state.athentication.username,
-
-        isOpen: state.sidebar.isOpen,
-        handler: state.sidebar.handler
+        isSidebarOpen: state.navigator.isSidebarOpen,
+        navList: state.navigator.navList
     })
 )(MainPage)
 //export default MainPage
