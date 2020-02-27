@@ -16,13 +16,13 @@ export default class SignupContainer extends Component {
         }
     }
     handleChange = (field, text) => {
-
         this.setState({
             [field]: text
         });
     }
     render(){
         const {handleChange} = this
+        const {navigator} = this.props
         return(
             <ScrollView style={styles.container}>
                 <View style={styles.titleContainer}>
@@ -87,7 +87,6 @@ export default class SignupContainer extends Component {
                         />
                     </View>
                     <View style={styles.inputBoxContainer} >
-
                         <TextInput style={styles.phoneFirstBox}
                             placeholder="082"
                             placeholderTextColor='#888'
@@ -100,15 +99,17 @@ export default class SignupContainer extends Component {
                         />
                     </View>
                 </View>
+
                 <View style={styles.enterButtonContainer}>
                     <View style={styles.enterButton}>
 
                     <Button
                         title="Enter"
-                        onPress={()=>{console.warn(this.state)}}
+                        onPress={()=>{navigator.pop()}}
                     /> 
                     </View>
                 </View>
+                
                 <View style={styles.bottomPadding}/>
             </ScrollView>
         )

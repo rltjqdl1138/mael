@@ -30,7 +30,7 @@ class MostlyContainer extends Component{
         MostlyActions.update(list)
     }
     render(){
-        const {list, navigator} = this.props
+        const {list} = this.props
         return(
             <View style={styles.container}>
                 <View style={styles.titleContainer}>
@@ -39,7 +39,7 @@ class MostlyContainer extends Component{
                     </Text>
                 </View>
                 <View style={styles.MostlyContainer}>
-                    <Mostly mostlylist={list} navigator={navigator}/>
+                    <Mostly mostlylist={list}/>
                 </View>
                 <View style={styles.bottomPadding} />
             </View>

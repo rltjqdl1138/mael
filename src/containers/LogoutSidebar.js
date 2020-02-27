@@ -3,39 +3,64 @@ import {View, StyleSheet, Text, Button, ScrollView, Image, TouchableWithoutFeedb
 
 export default class LoginSidebar extends Component{
     render(){
+        const {handleMainPush, handleWholePush, handleLogin, handleClose} = this.props
         return(
             <View style={styles.container}>
                 <View style={styles.signContainer}>
                     <TouchableHighlight
                         style={styles.loginContainer}
-                        onPress={this.props.handleLogin}>
+                        onPress={()=>{
+                            handleClose()
+                            handleWholePush('LoginContainer',{handleLogin})
+                        }}>
                         <Text style={{fontSize:20}}>로그인</Text>
                     </TouchableHighlight>
-
+                    <View style={styles.signPadding}>
+                        <Text style={{fontSize:20}}>
+                            /
+                        </Text>
+                    </View>
                     <TouchableHighlight
                         style={styles.loginContainer}
-                        onPress={this.props.handleLogin}>
+                        onPress={()=>{
+                            handleClose()
+                            handleWholePush('SignupContainer')
+                        }}>
                         <Text style={{fontSize:20}}>회원가입</Text>
                     </TouchableHighlight>
 
                 </View>
+
+
+
                 <View style={styles.noticeContainer}>
 
                 </View>
+
+
+
                 <View style={styles.otherContainer}>
                     <ScrollView>
                         <View style={temp.main1}/>
                     </ScrollView>
                 </View>
+
+
+
                 <View style={styles.settingContainer}>
                     <Image
                         style={styles.settingImage}
                         source={require('../image/owl.jpg')}
                     />
                 </View>
+            
+
                 <View style={styles.bottomLine}>
 
                 </View>
+
+
+                
                 <View style={styles.shopContainer}>
                     <Button
                         style={styles.shopButton}
@@ -83,7 +108,17 @@ const styles= StyleSheet.create({
         height:'100%',
         padding:5
 
+    },signPadding:{
+        width: 10,
+        height: '100%',
+        alignItems:'center',
+        marginLeft: 10,
+        marginRight: 10
     },
+
+
+
+
     noticeContainer:{
         flex:2,
         backgroundColor:'#000'

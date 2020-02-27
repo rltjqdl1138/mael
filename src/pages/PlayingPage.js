@@ -109,9 +109,9 @@ const styles=StyleSheet.create({
         left:0,
         width:'100%',
         height:'190%',
+        display:'none'
     },
     mini:{
-        //display:'none',
         height:'12%',
         width:'100%',
         backgroundColor:'#00f'

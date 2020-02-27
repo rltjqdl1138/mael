@@ -1,35 +1,42 @@
 import React, {Component} from 'react'
-import {View, StyleSheet, Text, Button, ScrollView, Image, TextComponent} from 'react-native'
-
+import { View, StyleSheet, Text, Button, ScrollView, Image, TouchableOpacity } from 'react-native'
+import MusicTitle from '../components/MusicTitle'
 export default class LoginSidebar extends Component{
     render(){
+        const { username, handleLogout, handleMainPush, handleWholePush, handleClose, handleOpenSetting, musicList } = this.props
         return(
-            <View style={styles.container}>
+            <View style={styles.container}> 
+
+                <View style={styles.topPadding}>
+
+                </View>   
                 <View style={styles.usernameContainer}>
-                    <Text style = {styles.usernameText}>
-                        {this.props.username ? this.props.username + "님" : "blank"}
-                    </Text>
-                    <Button title="logout" onPress={this.props.handleLogout}
-                        style={{position:'absolute', right:0}}
-                    />
+                    <TouchableOpacity onPress={()=>{handleWholePush('AccountInformationContainer')}}>
+                        <Text style = {styles.usernameText}>
+                            {username ? username + "님," : "blank"}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.noticeContainer}>
 
                 </View>
                 <View style={styles.otherContainer}>
                     <ScrollView>
-                        <View style={temp.main1}/>
-                        <View style={styles.gotoPlaylistContainer}>
+                        
+                        <MusicTitle musicList={musicList}/>
+                        <TouchableOpacity style={styles.gotoPlaylistContainer}
+                            onPress={()=>{handleClose();}} >
                             <Text> My playlist 바로가기 > </Text>
-                        </View>
+                        </TouchableOpacity>
                     </ScrollView>
                 </View>
-                <View style={styles.settingContainer}>
+                <TouchableOpacity style={styles.settingContainer}
+                    onPress={()=>{handleOpenSetting()}}>
                     <Image
                         style={styles.settingImage}
                         source={require('../image/owl.jpg')}
                     />
-                </View>
+                </TouchableOpacity>
                 <View style={styles.bottomLine}>
 
                 </View>
@@ -45,22 +52,6 @@ export default class LoginSidebar extends Component{
 }
 
 
-const temp = StyleSheet.create({
-    main1:{
-        width:'100%',
-        height:200,
-        backgroundColor:'#ff0'
-    },main2:{
-        width:'100%',
-        height:200,
-        backgroundColor:'#f0f'
-    },main3:{
-        width:'100%',
-        height:200,
-        backgroundColor:'#0ff'
-    }
-})
-
 
 const styles= StyleSheet.create({
     container:{
@@ -69,19 +60,19 @@ const styles= StyleSheet.create({
         paddingTop:40,
         paddingBottom:40
     },
+    topPadding:{
+        flex:1,
+        width:'100%'
+    },
+
     usernameContainer:{
         flex: 1,
         flexDirection:'row',
-        paddingLeft:40,
+        paddingLeft:30,
         alignContent:'center',
-        justifyContent:'center'
     },
     usernameText:{
-        position:'absolute',
         fontSize:20,
-        paddingLeft:20,
-        left:0,
-        top:'25%'
     },
 
     noticeContainer:{

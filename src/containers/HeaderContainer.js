@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class HeaderContainer extends Component {
     render(){
-        const {handleSidebar, handleNavPop} = this.props
+        const {handleSidebar, handlePop} = this.props
         return(
             <View style={styles.container}>
                 <TouchableOpacity style={styles.menuContainer} onPress={handleSidebar}>
@@ -12,7 +12,7 @@ export default class HeaderContainer extends Component {
                         source={require('../image/menu.jpg')}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.titleContainer} onPress={()=>{handleNavPop()}}>
+                <TouchableOpacity style={styles.titleContainer} onPress={()=>{handlePop()}}>
                     <Text style={styles.titleText}>
                         MAEL
                     </Text>
