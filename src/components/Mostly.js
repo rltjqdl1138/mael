@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import { StyleSheet, Image, Text, View, TouchableOpacity,ScrollView } from 'react-native';
-
+import { StyleSheet, Image, Text, View, TouchableOpacity,ScrollView,Dimensions } from 'react-native';
+const {width} = Dimensions.get('window')
 
 
 class MostlyItem extends Component {
@@ -9,13 +9,18 @@ class MostlyItem extends Component {
             title:this.props.title,
             temp:'aaa'
         }
+        const {navigator} = this.props
         return(
             <TouchableOpacity style={itemStyle.container}
-                onPress={()=>{alert('click!')}}>
+                onPress={()=>{navigator.push('AlbumContainer',conf)}}>
 
                 <View style={itemStyle.imageContainer}>
+
                     <Image style={itemStyle.image}
-                        source={require('../image/owl.jpg')}
+                        source={require('../image/owl2.jpg')}
+                    />
+                    <Image style={itemStyle.circle}
+                        source={require('../image/circle.png')}
                     />
                 </View>
 
@@ -34,37 +39,47 @@ class MostlyItem extends Component {
 
 const itemStyle = StyleSheet.create({
     container:{
-        width:260,
-        height:'100%',
-        paddingRight: 20,
-        paddingLeft: 20
+        width:width*0.5,
+        height:width*0.6,
+        paddingRight: 10,
+        paddingLeft: 10,
+        justifyContent:'center',
+        alignItems:'center'
     },
+
     imageContainer:{
-        padding:10,
-        flex: 5
+        flex:5,
+        width:'100%',
+        justifyContent:'center',
+        alignItems:'center'
     },
-    image:{
+    circle:{
+        position:'absolute',
         width:'100%',
         height:'100%',
-        resizeMode:'cover'
+        resizeMode:'contain',
+    },
+    image:{
+        position:'absolute',
+        width:'50%',
+        resizeMode:'contain',
     },
 
 
     titleContainer:{
-        flex:1,
         width:'100%',
-        height:'100%'
+        flex:1,
     },
     title:{
-        fontSize: 20,
-        color:'#777',
+        fontSize: 14,
+        color:'#121111',
         textAlign:'center'
     }
 })
 
 export default class Mostly extends Component{
     render(){
-        const {mostlylist} = this.props
+        const {mostlylist, navigator} = this.props
         const mostlyItems = !mostlylist ?
             (<Text> Blank </Text>):
             mostlylist.map(
@@ -76,6 +91,7 @@ export default class Mostly extends Component{
                             MID={MID}
                             imageURL={imageURL}
                             title={title}
+                            navigator={navigator}
                         />
                     )
                 }
@@ -85,7 +101,11 @@ export default class Mostly extends Component{
                     <ScrollView style={containerStyle.scroll}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}>
+
+                    <View style={containerStyle.itemPadding}/>
                         { mostlyItems }
+
+                        <View style={containerStyle.itemPadding}/>
                     </ScrollView>
                 </View>
             )
@@ -98,6 +118,10 @@ const containerStyle = StyleSheet.create({
         width:'100%'
     },
     scroll:{
+        height:'100%'
+    },
+    itemPadding:{
+        width:20,
         height:'100%'
     }
 })

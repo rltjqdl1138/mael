@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import { View, StyleSheet, Text, Button, ScrollView, Image, TouchableOpacity } from 'react-native'
+import deviceCheck from '../deviceCheck'
 
 export default class LoginSetting extends Component{
     render(){
@@ -8,22 +9,33 @@ export default class LoginSetting extends Component{
             <View style={styles.container}>
                 <View style={styles.topPadding}>
                     <TouchableOpacity style={styles.backButton}
-                        onPress={handleCloseSetting}
-                    >
+                        onPress={handleCloseSetting} >
+                            <Image style={styles.backButtonImage}
+                                source={require('../icon/back.png')}
+                            />
                     </TouchableOpacity>
-                </View>   
+                </View> 
+                { /*
                 <View style={styles.usernameContainer}>
                     <TouchableOpacity onPress={()=>{handleWholePush('AccountInformationContainer')}}>
                         <Text style = {styles.usernameText}>
                             {username ? username + "님," : "blank"}
                         </Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
                 <View style={styles.settingContainer}>
                     <TouchableOpacity style={styles.settingItem}
                         onPress={()=>{
                             handleClose()
-                            handleWholePush('AccountInformationContainer') }}>
+                            handleWholePush('PlanPage') }}>
+                        <Text style={styles.settingItemText}>
+                            플랜선택
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.settingItem}
+                        onPress={()=>{
+                            handleClose()
+                            handleWholePush('AccountInfoPage') }}>
                         <Text style={styles.settingItemText}>
                             개인정보
                         </Text>
@@ -37,6 +49,7 @@ export default class LoginSetting extends Component{
                             비밀번호 변경
                         </Text>
                     </TouchableOpacity>
+
 
                     <TouchableOpacity style={styles.settingItem}
                         onPress={()=>{`
@@ -83,43 +96,37 @@ export default class LoginSetting extends Component{
 const styles= StyleSheet.create({
     container:{
         width:'100%',
-        height:'100%',
-        paddingTop:40,
-        paddingBottom:40
+        height:'100%'
     },
 
     topPadding:{
+        marginTop:40,
         width:'100%',
-        flex:1
+        height:40,
+        justifyContent:'center',
     },
+
     backButton:{
         marginLeft: 30,
-        backgroundColor:'#000',
-        width:40,
-        height:40
+        width:30,
+        height:30
     },
-
-    usernameContainer:{
-        flex: 1,
-        flexDirection:'row',
-        paddingLeft:30,
-        alignContent:'center',
+    backButtonImage:{
+        height:'100%',
+        width:'100%',
+        resizeMode:'contain'
     },
-    usernameText:{
-        fontSize:20,
-    },
-
     settingContainer:{
-        flex:12,
+        flex:1,
         backgroundColor:'#fff',
-        paddingTop:40
+        paddingTop:80
     },
     settingItem:{
         padding: 20,
         paddingLeft: 40
     },
     settingItemText:{
-        fontSize:18
+        fontSize:15
     }
 
 })

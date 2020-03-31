@@ -1,20 +1,21 @@
 import React, {Component} from 'react';
 import { StyleSheet, Text, View, Animated, Dimensions, Button } from 'react-native';
 import { connect } from 'react-redux'
-import { AthenticationActions  } from '../store/actionCreator'
+import { AthenticationActions, AudioActions  } from '../store/actionCreator'
 
 import HeaderContainer from '../containers/HeaderContainer'
 import MainContainer from '../containers/MainContainer'
-import PlayingContainer from '../containers/PlayingContainer';
-import SignupContainer from '../containers/SignupContainer'
+import AlbumContainer from '../containers/AlbumContainer';
+import deviceCheck from '../deviceCheck'
 import PlayingPage from './PlayingPage'
+import MyPlaylistPage from './MyPlaylistPage'
 import SidebarPage from './SidebarPage'
 import {Route, Navigator} from '../navigator/navigator'
 
+
+
 class MainPage extends Component {
-
     screenHeight = Dimensions.get('window').height
-
     getMusicList = () =>{
         const {themeList, mostlyList} = this.props
         const mostlyTitle = mostlyList.map(dat => dat.title)
@@ -58,29 +59,38 @@ class MainPage extends Component {
         const {navList} = this.props
         if(!navList['mainPage'])
             console.warn('handleSidebar: navList null')
-        else
-            navList['mainPage'].pop(name)
+        else{
+            const list = navList['mainPage'].pop(name)
+
+            if(list && list[0] && (list[0].key === "AlbumContainer" || list[0].key === "MyPlaylistPage")){
+                AudioActions.update()
+            }
+        }
     }
+
+    
     render(){
-        const {isLogin, token, username} = this.props
+        const {isLogin, token, username, showPlaybar} = this.props
         const {handleMainPush, handleMainPop, handleWholePush, handleWholePop, getMusicList} = this
         const musicList = getMusicList()
         return(
             <View style={styles.container}>
                 
+                <View style={styles.mainscreenContainer}>
+                    <Navigator id="mainPage">
+                        <Route name="MainContainer" component={MainContainer} />
+                        <Route name="MyPlaylistPage" component={MyPlaylistPage} />
+                        <Route name="AlbumContainer" component={AlbumContainer} />
+                    </Navigator>
+                </View>
                 <View style={styles.header}>
                     <HeaderContainer
                         handleSidebar={this.props.handler.open}
                         handlePop={handleMainPop}
                     />
                 </View>
-                <View style={styles.mainscreenContainer}>
-                    <Navigator id="mainPage">
-                        <Route name="MainContainer" component={MainContainer} />
-                        <Route name="SignupContainer" component={SignupContainer} />
-                    </Navigator>
-                </View>
-                <PlayingPage headerPos={this.screenHeight*0.1212}/>
+                <View style={showPlaybar? styles.bottomPadding:styles.hideBottomPadding} />
+                <PlayingPage headerPos={this.screenHeight*0.1212} />
                 <SidebarPage
                     isLogin={isLogin}
                     handleLogin={this.handleLogin}
@@ -106,32 +116,28 @@ const styles = StyleSheet.create({
     
     // HEADER
     header:{
-        flex:1,
+        position:'absolute',
+        top:0,
+        height:67,
         width:'100%',
-        backgroundColor:'#f00',
-        borderWidth:1,
-        borderColor:'#f00'
+        backgroundColor:'#f00'
     },
 
     // MAIN SCREEN
     mainscreenContainer:{
-        flex:10,
+        top:67,
+        flex:1,
         width:'100%',
-        borderColor:'#f00',
-        backgroundColor:'#fff',
-        borderWidth:1
+        borderColor:'#f00'
     },
 
-
-    // SIDE BAR
-    sidebarContainer:{
-        position:'absolute',
-        height:'90%',
-        top: '10%',
-        left: 0,
-        borderTopWidth: 3,
-        borderTopColor: '#777',
-        backgroundColor: '#ccc'
+    bottomPadding:{
+        height:deviceCheck.ifTopbarless?220:180,
+        width:'100%'
+    },
+    hideBottomPadding:{
+        height:deviceCheck.ifTopbarless?100:20,
+        width:'100%'
     }
 
 });
@@ -145,7 +151,8 @@ export default connect(
         token: state.athentication.token,
         username: state.athentication.username,
         handler: state.sidebar.handler,
-        navList: state.navigator.navList
+        navList: state.navigator.navList,
+        showPlaybar: state.audio.showPlaybar
     })
 )(MainPage)
 //export default MainPage

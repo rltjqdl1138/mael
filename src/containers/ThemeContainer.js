@@ -73,17 +73,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        paddingTop: 15
     },
-    
-    //PADDING
-
-    bottomPadding:{
-        height: 10,
-        width:'80%',
-        borderBottomWidth:1,
-        borderBottomColor:'#ccc'
-    }
 })
 
 
@@ -98,7 +88,7 @@ class ThemeItem extends Component{
                     const {title, themeList} = theme
                     return (
                         <Theme
-                            Key={title}
+                            key={title}
                             themeList={themeList}
                             title={title}
                         />

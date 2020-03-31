@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import {StyleSheet, View, TouchableOpacity, ScrollView, Image, Text } from 'react-native'
-
+import {StyleSheet, View, TouchableOpacity, ScrollView, Image, Text, Dimensions } from 'react-native'
+const { width } = Dimensions.get('window')
 class ThemeItem extends Component{
     render(){
         return(
@@ -25,18 +25,18 @@ class ThemeItem extends Component{
 
 const itemStyle = StyleSheet.create({
     container:{
-        width:200,
-        height:'100%',
-        paddingRight: 20,
-        paddingLeft: 20
+        width:width*0.45+10,
+        height:width*0.55,
+        marginRight: 5,
+        marginLeft: 5
     },
     imageContainer:{
-        padding:10,
-        flex: 5
+        width:width*0.45,
+        height:width*0.45
     },
     image:{
-        width:'100%',
-        height:'100%',
+        width:width*0.45,
+        height:width*0.45,
         resizeMode:'cover'
     },
 
@@ -44,13 +44,13 @@ const itemStyle = StyleSheet.create({
     titleContainer:{
         flex:1,
         width:'100%',
-        height:'100%'
+        justifyContent:'center',
     },
     title:{
-        fontSize: 15,
-        color:'#777',
+        fontSize: 14,
+        color:'#121111',
         textAlign:'center'
-    }
+    },
 })
 
 
@@ -79,18 +79,23 @@ export default class Theme extends Component{
                         <Text style={containerStyle.title}>
                             {title}
                         </Text>
+                        <Text style={containerStyle.subTitle}>
+                            Occasionally when you feel
+                        </Text>
                     </View>
 
                     <View style={containerStyle.themeContainer}>
                         <ScrollView style={containerStyle.scroll}
                             horizontal={true}
                             showsHorizontalScrollIndicator={false}>
+                            <View style={containerStyle.itemPadding}/>
                             { themeItems }
+                            <View style={containerStyle.itemPadding}/>
                         </ScrollView>
 
                     </View>
-                    <View style={containerStyle.bottomPadding}>
-
+                    <View style={containerStyle.bottomPaddingContainer}>
+                        <View style={containerStyle.bottomPadding} />
                     </View>
                 </View>
             )
@@ -105,10 +110,9 @@ const containerStyle = StyleSheet.create({
 
     container:{
         alignItems: 'center',
-        justifyContent: 'center',
         width: '100%',
-        height: 250,
-        paddingTop: 15
+        height: width*0.7,
+        marginTop:20
     },
     
 
@@ -118,25 +122,40 @@ const containerStyle = StyleSheet.create({
         width: '100%',
         flex: 1,
     },title:{
-        paddingLeft: 40,
+        paddingLeft: 25,
         fontSize: 16,
         fontWeight: "bold"
+    },
+    subTitle:{
+        color:'#767171',
+        fontSize:10,
+        paddingLeft:30,
     },
 
 
     // MAIN CONTENTS
 
     themeContainer:{
-        flex: 7
+        flex: 5
     },
 
 
     //PADDING
-
+    bottomPaddingContainer:{
+        height:0,
+        width:'100%',
+        paddingLeft:20,
+        paddingRight:20,
+    },
     bottomPadding:{
-        height: 10,
-        width:'80%',
+        height: 0,
+        width:'100%',
         borderBottomWidth:1,
         borderBottomColor:'#ccc'
+    },
+
+    itemPadding:{
+        width:20,
+        height:'100%'
     }
 })

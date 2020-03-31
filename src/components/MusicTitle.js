@@ -3,13 +3,15 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native'
 
 export default class MusicTitle extends Component {
     render(){
-        const {musicList} = this.props
+        const {musicList, handleMainPush, handleClose} = this.props
         const title = musicList.map(item => {
             return (
                 <MusicTitleItem
                     key={item} 
                     title={item}
                     link={item}
+                    handleMainPush={handleMainPush}
+                    handleClose={handleClose}
                 />
             )
         })
@@ -27,9 +29,12 @@ export default class MusicTitle extends Component {
 
 class MusicTitleItem extends Component{
     render(){
-        const {title, link} = this.props
+        const {title, link, handleMainPush, handleClose} = this.props
         return(
-            <TouchableOpacity onPress={()=>{alert(link)}}
+            <TouchableOpacity onPress={()=>{
+                    handleClose()
+                    handleMainPush('AlbumContainer',{title:title})
+                }}
                 style={styles.itemContainer}>
                 <Text style={styles.itemText}>{title}</Text>
             </TouchableOpacity>
@@ -38,20 +43,21 @@ class MusicTitleItem extends Component{
 }
 const styles=StyleSheet.create({
     container:{
-        margin:20
+        paddingTop:20,
+        paddingLeft:30
     },
     textContainer:{
-        marginBottom:15
+        paddingTop:10,
+        paddingBottom:20
     },
     text:{
-        fontSize:20,
+        fontSize:16,
         fontWeight:'bold'
     },
     itemContainer:{
         width:'100%',
-        height:40,
-        marginLeft: 10,
-
+        height:45,
+        marginLeft: 5,
     },
     itemText:{
         fontSize:15,

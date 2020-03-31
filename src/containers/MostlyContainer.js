@@ -1,10 +1,12 @@
 import React, {Component} from 'react'
-import { StyleSheet, Text, View,Button } from 'react-native'
+import { StyleSheet, Text, View, Dimensions } from 'react-native'
 
 import { connect } from 'react-redux'
 import { MostlyActions } from '../store/actionCreator'
 
 import Mostly from '../components/Mostly'
+
+const {width} = Dimensions.get('window')
 
 class MostlyContainer extends Component{
     constructor(){
@@ -16,32 +18,37 @@ class MostlyContainer extends Component{
         const list = [{
                 MID:1,
                 imageURL:'image',
-                title:'MOSTLY ANIMAL 1'
+                title:'Mostly Animals 1'
             },{
                 MID:2,
                 imageURL:'image',
-                title:'MOSTLY ANIMAL 2'
+                title:'Mostly Animals 2'
             },{
                 MID:3,
                 imageURL:'image',
-                title:'MOSTLY ANIMAL 3'
+                title:'Mostly Animal 3'
             }
         ]
         MostlyActions.update(list)
     }
     render(){
-        const {list} = this.props
+        const {list, navigator} = this.props
         return(
             <View style={styles.container}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>
                         Mostly Series
                     </Text>
+                    <Text style={styles.subTitle}>
+                        Mostly Soundbook Series
+                    </Text>
                 </View>
                 <View style={styles.MostlyContainer}>
-                    <Mostly mostlylist={list}/>
+                    <Mostly mostlylist={list} navigator={navigator}/>
                 </View>
-                <View style={styles.bottomPadding} />
+                <View style={styles.bottomPaddingContainer}>
+                    <View style={styles.bottomPadding} />
+                </View>
             </View>
         )
     }
@@ -55,8 +62,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        height: 320,
-        paddingTop: 15
+        height: width*0.7
     },
     
 
@@ -65,27 +71,40 @@ const styles = StyleSheet.create({
     titleContainer:{
         width: '100%',
         flex: 1,
+        justifyContent:'flex-start',
     },title:{
-        paddingLeft: 40,
-        fontSize: 20,
-        fontWeight: "bold"
+        fontSize: 16,
+        color:'#121111',
+        paddingLeft: 25,
+        fontWeight:'bold'
+    },subTitle:{
+        color:'#767171',
+        fontSize:10,
+        paddingLeft:30,
     },
-
 
     // MAIN CONTENTS
 
     MostlyContainer:{
-        flex: 7
+        flex: 5,
+        width:'100%'
     },
 
 
     //PADDING
 
+    bottomPaddingContainer:{
+        height: 0,
+        width:'100%',
+        paddingLeft:20,
+        paddingRight:20
+    },
     bottomPadding:{
-        height: 10,
-        width:'80%',
-        borderBottomWidth:1,
-        borderBottomColor:'#ccc'
+        height: 0,
+        width:'100%',
+        borderBottomWidth:0.5,
+        borderBottomColor:'#ccc',
+
     }
 })
 

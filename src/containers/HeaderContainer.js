@@ -9,7 +9,7 @@ export default class HeaderContainer extends Component {
                 <TouchableOpacity style={styles.menuContainer} onPress={handleSidebar}>
                     <Image
                         style={styles.menuImage}
-                        source={require('../image/menu.jpg')}
+                        source={require('../icon/menu.png')}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.titleContainer} onPress={()=>{handlePop()}}>
@@ -20,7 +20,7 @@ export default class HeaderContainer extends Component {
                 <View style={styles.searchContainer}>
                     <Image
                         style={styles.searchImage}
-                        source={require('../image/search.jpg')}
+                        source={require('../icon/search.png')}
                     />
                 </View>
             </View>
@@ -48,11 +48,11 @@ const styles = StyleSheet.create({
         left:0,
         backgroundColor:'#fff',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'flex-end'
     },menuImage:{
         width:'100%',
-        height:'100%',
-        resizeMode:'cover'
+        height:'80%',
+        resizeMode:'contain'
     },
 
 
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         flex:1
     },titleText:{
         width:'100%',
-        fontSize: 25,
+        fontSize: 26,
         color:'#555',
         fontWeight:'300'
     },
@@ -78,11 +78,11 @@ const styles = StyleSheet.create({
         right:0,
         backgroundColor:'#fff',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'flex-end'
     },searchImage:{
-        width:'60%',
-        height:'60%',
-        resizeMode:'cover'
+        width:'100%',
+        height:'80%',
+        resizeMode:'contain'
     },
 
 })

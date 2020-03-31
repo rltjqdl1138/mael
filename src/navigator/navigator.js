@@ -63,13 +63,22 @@ export class Navigator extends Component {
                     useNativeDriver: true
                 }).start()
             })
+        }else{
+            const newConfig = this.state.sceneConfig
+            newConfig[sceneName].config = config
+            this.setState(state => ({
+                    ...this.state,
+                    sceneConfig: newConfig
+                })
+            )
         }
     }
 
     handlePop = (sceneName) =>{
         const isThere = (element) => element['key'] === sceneName
         const { width } = Dimensions.get('window')
-        Animated.delay(100)
+        const {stack} = this.state
+        const ind = stack.findIndex(isThere)
         Animated.timing(this._animatedValue,{
             toValue: width,
             duration: 300,
@@ -77,8 +86,6 @@ export class Navigator extends Component {
         }).start(()=>{
             this._animatedValue.setValue(0)
             this.setState(state =>{
-                const {stack} = state
-                const ind = stack.findIndex(isThere)
                 if(!sceneName || sceneName==="" || ind===-1){
                     return {
                         ...state,
@@ -88,12 +95,17 @@ export class Navigator extends Component {
                 else if(stack.length > ind){
                     return {
                         ...state,
-                        stack: stack.slice(0, stack.length - 1)
+                        stack: stack.slice(0, ind)
                     }
                 }
                 return state
             })
         })
+        if(ind === -1){
+            return stack.slice(1,stack.length)
+        }
+
+        return stack.slice(ind, stack.length)
     }
     render(){
 
