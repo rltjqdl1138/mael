@@ -1,10 +1,13 @@
 import React, {Component} from 'react'
 import {StyleSheet, View, TouchableOpacity, ScrollView, Image, Text, Dimensions } from 'react-native'
 const { width } = Dimensions.get('window')
+
 class ThemeItem extends Component{
     render(){
+        const {title, albumID, navigator} = this.props
         return(
-            <TouchableOpacity style={itemStyle.container}>
+            <TouchableOpacity style={itemStyle.container}
+                onPress={()=>navigator.push('AlbumContainer',{title, albumID})}>
 
                 <View style={itemStyle.imageContainer}>
                     <Image style={itemStyle.image}
@@ -25,14 +28,15 @@ class ThemeItem extends Component{
 
 const itemStyle = StyleSheet.create({
     container:{
-        width:width*0.45+10,
-        height:width*0.55,
-        marginRight: 5,
-        marginLeft: 5
+        width:width*0.5,
+        height:width*0.6,
+        paddingRight: 10,
+        paddingLeft: 0,
+        justifyContent:'center',
+        alignItems:'center',
     },
     imageContainer:{
-        width:width*0.45,
-        height:width*0.45
+        flex:1
     },
     image:{
         width:width*0.45,
@@ -42,9 +46,9 @@ const itemStyle = StyleSheet.create({
 
 
     titleContainer:{
-        flex:1,
+        height:60,
+        paddingTop:12,
         width:'100%',
-        justifyContent:'center',
     },
     title:{
         fontSize: 14,
@@ -57,22 +61,20 @@ const itemStyle = StyleSheet.create({
 
 export default class Theme extends Component{
     render(){
-        const {themeList, title} = this.props
+        const {themeList, title, subTitle, navigator } = this.props
         const themeItems = !themeList ?
             (<Text> Loading... </Text>):
-            themeList.map(
-                theme => {
-                    const {TID, imageURL, title} = theme
-                    return (
-                        <ThemeItem
-                            key={TID}
-                            TID={TID}
-                            imageURL={imageURL}
-                            title={title}
-                        />
-                    )
-                }
-            )
+            themeList.map( theme => {
+                const {ID, title} = theme
+                return (
+                    <ThemeItem
+                        key={ID}
+                        albumID={ID}
+                        title={title}
+                        navigator={navigator}
+                    />)
+            })
+
             return(
                 <View style={containerStyle.container}>
                     <View style={containerStyle.titleContainer}>
@@ -80,7 +82,7 @@ export default class Theme extends Component{
                             {title}
                         </Text>
                         <Text style={containerStyle.subTitle}>
-                            Occasionally when you feel
+                            {subTitle}
                         </Text>
                     </View>
 
@@ -111,8 +113,8 @@ const containerStyle = StyleSheet.create({
     container:{
         alignItems: 'center',
         width: '100%',
-        height: width*0.7,
-        marginTop:20
+        height: width*0.72,
+        marginTop:45
     },
     
 
@@ -120,23 +122,24 @@ const containerStyle = StyleSheet.create({
 
     titleContainer:{
         width: '100%',
-        flex: 1,
+        height:60,
     },title:{
         paddingLeft: 25,
         fontSize: 16,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        paddingBottom:3
     },
     subTitle:{
         color:'#767171',
         fontSize:10,
-        paddingLeft:30,
+        paddingLeft:25,
     },
 
 
     // MAIN CONTENTS
 
     themeContainer:{
-        flex: 5
+        flex: 1
     },
 
 
@@ -148,7 +151,8 @@ const containerStyle = StyleSheet.create({
         paddingRight:20,
     },
     bottomPadding:{
-        height: 0,
+        paddingTop:5,
+        height: 22,
         width:'100%',
         borderBottomWidth:1,
         borderBottomColor:'#ccc'

@@ -47,6 +47,22 @@ export default class PlanPage extends Component {
     getNotice = ()=>{
         return ''
     }
+    getModal = (items) =>{
+        const {isOpen, plans} = this.state
+        if(!isOpen)
+            return null
+        return (
+            <View style={[styles.selectBoxContainer,{
+                height:plans.length*50}]}>
+                <View style={styles.selectBox}>
+                    {items}
+                </View>
+            </View>
+
+        )
+
+
+    }
     render(){
         const {navigator} = this.props
         const {handleChange, getNotice, getID} = this
@@ -54,7 +70,7 @@ export default class PlanPage extends Component {
         const items = plans.map((item,ind)=>(
                 <TouchableOpacity style={{width:'100%',height:50, justifyContent:'center'}}
                     onPress={()=>{this.setState(state=>({...state, isOpen:false, index:ind}))}}
-                    Key={item.key}>
+                    key={item.id}>
                     <Text style={{fontSize:13,color:index===ind?'#FF6E43':'#121111'  }}>{item.info}</Text>
                 </TouchableOpacity>
             ))
@@ -63,7 +79,8 @@ export default class PlanPage extends Component {
                 <SimpleHeader 
                     title="플랜 변경"
                     handler={()=>{navigator.pop('PlanPage')}}
-                    notice=''/>
+                    notice=''
+                    handleComplete={()=>{alert('complete')}}/>
                 <ScrollView contentContainerStyle={styles.mainContainer}
                     keyboardShouldPersistTaps='handled'
                     onScrollBeginDrag={()=>handleChange('isOpen',false)}
@@ -95,24 +112,8 @@ export default class PlanPage extends Component {
                             code={this.state.code}
                             card={this.state.card} />
                     </View>
-                    <View style={[styles.underContainer,{borderWidth:2,borderColor:'blue'}]}>
-
-                        <View style={{height:100, backgroundColor:'red'}}/>
-
-                    </View>
-                    <View style={{flex:1, alignItems:'center', display:'none'}}>
-                        <TouchableOpacity style={{width:100, height:50, borderWidth:1}}
-                            onPress={()=>{this.setState((state)=>({...state, index: 1-state.index}))}}>
-                            <Text style={{textAlign:'center'}}>Test</Text>
-                        </TouchableOpacity>
-                    </View>
                 </ScrollView>
-                
-                <View style={[styles.selectBoxContainer,{display:isOpen?'flex':'none', height:plans.length*50}]}>
-                    <View style={styles.selectBox}>
-                        {items}
-                    </View>
-                </View>
+                {this.getModal(items)}
             </View>
         )
     }
@@ -121,7 +122,7 @@ export default class PlanPage extends Component {
 const styles = StyleSheet.create({
     container:{
         flex:1,
-        backgroundColor:'#fff'
+        backgroundColor:'#fff',
     },
 
     mainContainer:{
@@ -186,11 +187,12 @@ const styles = StyleSheet.create({
         height:'100%',
         resizeMode:'contain'    
     },
+    //103 + 30 + 60 + 42
     selectBoxContainer:{
         alignSelf:'center',
         width:'100%',
         position:'absolute',
-        top:215,
+        top:235,
         paddingLeft:25,
         paddingRight:25
     },
@@ -206,234 +208,3 @@ const styles = StyleSheet.create({
     }
 })
 
-
-class CreditInfo extends Component {
-    getTitle(type){
-        switch(type){
-            case 0:
-                return (
-                    <View style={infoStyle.titleContainer}>
-                        <Text style={infoStyle.titleText}>결제 정보</Text>
-                    </View>
-                )
-            case 1:
-                return (
-                    <View style={infoStyle.titleContainer}>
-                        <Text style={infoStyle.titleText}>Promo Code</Text>
-                        <View style={infoStyle.titleInfoContainer}>
-                            <Image style={infoStyle.titleInfoImage}
-                                source={require('../icon/info.png')}/>
-                            <Text style={infoStyle.titleInfoText}>
-                                제품 구입시 블랙카드에 담긴 고유번호 입니다.
-                            </Text>
-                        </View>
-                    </View>
-                )
-            default:
-                return( <View /> )
-        }
-    }
-    getInput(type){
-        switch(type){
-            case 0:
-                return this.getCreditInput()
-            case 1:
-                return this.getCodeInput()
-            default:
-                return( <View /> )
-        }
-    }
-    getCodeInput(){
-        return(
-            <View style={infoStyle.inputContainer}>
-                <TextInput style={[infoStyle.inputBox,{color:'#121111'}]}
-                    placeholder="Promotion code"
-                    placeholderTextColor='#888'
-                    onChangeText={text=>this.props.handleChange('code',text)} />
-            </View>
-        )
-    }
-    toStar(str){
-        var result=''
-        for(var i=0; i<str.length; i++) result+='*'
-        return result
-    }
-    getCreditInput(){
-        const card = this.props.card
-        return(
-            <View style={infoStyle.container}>
-                <View style={infoStyle.upperContainer}>
-                    <View style={infoStyle.subTitleContainer}>
-                        <Text style={infoStyle.subTitleText}>Card Number</Text>
-                    </View>
-                    <View style={infoStyle.inputContainer}>
-                        <View style={infoStyle.cardNumberMask} >
-                            <Text style={infoStyle.cardNumberMaskText}>{this.props.card.num.slice(0,4)}</Text>
-                            <Text style={infoStyle.cardNumberMaskPadding}>-</Text>
-                            <Text style={infoStyle.cardNumberMaskText}>{this.props.card.num.slice(4,8)}</Text>
-                            <Text style={infoStyle.cardNumberMaskPadding}>-</Text>
-                            <Text style={infoStyle.cardNumberMaskText}>{this.toStar(this.props.card.num.slice(8,12))}</Text>
-                            <Text style={infoStyle.cardNumberMaskPadding}>-</Text>
-                            <Text style={infoStyle.cardNumberMaskText}>{this.toStar(this.props.card.num.slice(12,16))}</Text>
-
-                        </View>
-                        <TextInput style={[infoStyle.inputBox,{ fontSize:1, }]}
-                            onChangeText={text=>this.props.handleChange('card',{...card, num:text})}
-                            keyboardType='phone-pad'
-                            maxLength={16}
-                            caretHidden={true}
-                            clearTextOnFocus={true}
-                            onFocus={()=>{this.props.handleChange('card',{...card, num:''})}}/>
-                        
-                    </View>
-                </View>
-                <View style={infoStyle.underContainer}>
-                    <View style={infoStyle.container}>
-                        <View style={infoStyle.subTitleContainer}>
-                            <Text style={infoStyle.subTitleText}>유효기간</Text>
-                        </View>
-                        <View style={infoStyle.inputContainer}>
-
-                            <View style={infoStyle.cardNumberMask} >
-                                <Text style={infoStyle.cardNumberMaskText}>
-                                    {card.date.length > 0 ? card.date.slice(0,2) : 'MM'}
-                                </Text>
-                                <Text style={infoStyle.cardNumberMaskPadding}>/</Text>
-                                <Text style={infoStyle.cardNumberMaskText}>
-                                    {card.date.length > 2 ? card.date.slice(2,4) : 'YY'}
-                                </Text>
-                            </View>
-                            <TextInput style={[infoStyle.inputBox,{ fontSize:1, }]}
-                                onChangeText={text=>this.props.handleChange('card',{...card, date:text})}
-                                keyboardType='phone-pad'
-                                maxLength={4}
-                                caretHidden={true}
-                                clearTextOnFocus={true}
-                                onFocus={()=>{this.props.handleChange('card',{...card, date:''})}}/>
-                            
-
-                        </View>
-                    </View>
-                    <View style={infoStyle.insidePadding}/>
-                    <View style={infoStyle.container}>
-                        <View style={infoStyle.subTitleContainer}>
-                            <Text style={infoStyle.subTitleText}>CVC</Text>
-                        </View>
-                        <View style={infoStyle.inputContainer}>
-                            <TextInput style={[infoStyle.inputBox,{textAlign:'center',color:'#121111'}]}
-                                value={card.cvc}
-                                onChangeText={text=>this.props.handleChange('card',{...card, cvc:text})}
-                                keyboardType='phone-pad'
-                                maxLength={3}
-                                caretHidden={true}
-                                clearTextOnFocus={true}
-                                autoCompleteType='password'
-                                onFocus={()=>{this.props.handleChange('card',{...card, cvc:''})}}/>
-                        </View>
-                    </View>
-                </View>
-            </View>
-        )
-    }
-    render(){
-        const {type} = this.props
-        return(
-            <View style={styles.container}>
-                {this.getTitle(type)}
-                {this.getInput(type)}
-            </View>
-        )
-    }
-
-}
-
-const infoStyle = StyleSheet.create({
-    container:{
-        flex:1
-    },
-    titleContainer:{
-        height:60,
-        width:'100%',
-        flexDirection:'row',
-        alignItems:'center',
-    },
-    titleText:{
-        fontSize:17,
-        color:'#121111'
-    },
-    titleInfoContainer:{
-        flex:1,
-        height:'100%',
-        flexDirection:'row',
-        alignItems:'center'
-    },
-    titleInfoImage:{
-        height:35,
-        width:35,
-        resizeMode:'contain'
-    },
-    titleInfoText:{
-        fontSize:10,
-        color:'#767171'
-    },
-
-    inputContainer:{
-        alignSelf:'center',
-        height:42,
-        width:'100%',
-        borderWidth:1,
-        borderColor:'#DEDDDD',
-        borderRadius:12,
-        alignItems:'center'
-    },
-    inputBox:{
-        width:'100%',
-        height:'100%',
-        paddingLeft:12,
-        paddingRight:12,
-        color:'#fff'
-    },
-    cardNumberMask:{
-        alignSelf:'center',
-        position:'absolute',
-        width:'100%',
-        height:'100%',
-        flexDirection:'row',
-        alignItems:'center',
-        paddingLeft:30,
-        paddingRight:30
-    },
-    cardNumberMaskText:{
-        flex:1,
-        fontSize:13,
-        color:'#121111',
-        textAlign:'center'
-    },
-    cardNumberMaskPadding:{
-        flex:1,
-        fontSize:13,
-        color:'#121111',
-        textAlign:'center'
-    },
-
-    subTitleContainer:{
-        height:20,
-        width:'100%'
-    },
-    subTitleText:{
-        fontSize:13,
-        color:'#121111'
-    },
-    upperContainer:{
-        width:'100%',
-        height:80
-    },
-    underContainer:{
-        width:'100%',
-        height:80,
-        flexDirection:'row'
-    },
-    insidePadding:{
-        width:30
-    }
-})

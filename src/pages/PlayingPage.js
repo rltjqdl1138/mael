@@ -1,36 +1,37 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import {View, StyleSheet, Animated, PanResponder, Dimensions, TouchableOpacity, Button} from 'react-native'
+import {View, StyleSheet, Animated, PanResponder, Dimensions, TouchableOpacity, Image} from 'react-native'
 
 import PlayingContainer from '../containers/PlayingContainer'
 import MiniPlaybar from '../components/MiniPlaybar'
 import { AudioActions  } from '../store/actionCreator'
 import deviceCheck from '../deviceCheck'
+
 const minibarSize = deviceCheck.ifTopbarless ? 120 : 100
-
-
 
 class PlayingPage extends Component{
     constructor(props){
         super(props)
         this.state = {isOpen:false}
     }
+
     screenHeight = Dimensions.get('window').height
     //headerPos = this.props.headerPos ? this.props.headerPos : 0
     //headerPos = 67
     headerPos = -minibarSize
 
-    scrollDownPos = deviceCheck.ifTopbarless ? this.screenHeight-155 :this.screenHeight - 115
+    scrollDownPos = deviceCheck.ifTopbarless ? this.screenHeight-125 :this.screenHeight - 100
     minibarOpacity = new Animated.Value(1)
     translatedY = new Animated.Value(this.scrollDownPos)
     _panResponder = PanResponder.create({
         onStartShouldSetPanResponder: ({nativeEvent}, gestureState) =>{
             const {isOpen} = this.state
-            if(isOpen && nativeEvent.pageY < this.screenHeight * 0.2){
+            if(isOpen && nativeEvent.pageY < this.screenHeight * 0.2)
                 return true
-            }
+            
             else if(isOpen)
                 return false
+            
             return true
             
         },
@@ -74,8 +75,6 @@ class PlayingPage extends Component{
                 }).start(()=>{
                     this.setState({isOpen:true})
                 })
-
-
             }else if(!isOpen){
                 Animated.timing(this.minibarOpacity,{
                     toValue:1
@@ -83,7 +82,7 @@ class PlayingPage extends Component{
                 Animated.timing(this.translatedY, {
                     toValue: this.screenHeight
                 }).start(()=>{
-                    AudioActions.ending()
+                    //AudioActions.ending()
                     this.translatedY.setValue(this.scrollDownPos)
                 })
             }
@@ -113,7 +112,6 @@ class PlayingPage extends Component{
         onPanResponderTerminate: (evt, gestureState) => {
           // Another component has become the responder, so this gesture
           // should be cancelled
-
             const {isOpen} = this.state
 
             if(isOpen){
@@ -134,7 +132,6 @@ class PlayingPage extends Component{
                     duration:200
                 }).start()
             }
-
         },
         onShouldBlockNativeResponder: (evt, gestureState) => {
           // Returns whether this component should block native components from becoming the JS
@@ -143,24 +140,15 @@ class PlayingPage extends Component{
         },
     })
     getStyle(){
-        return [
-            styles.container, {transform: [{translateY: this.translatedY}]}
-        ]
+        return [styles.container, {transform: [{translateY: this.translatedY}]}]
     }
     getMinibarStyle(){
-        //height:this.state.isOpen?0:minibarSize
-        //return width:this.state.isOpen?'0%':'100%'
         return [styles.mini, {opacity: this.minibarOpacity}]
     }
-
-    getTime = () =>{
-        const {oldTime} = this.props
-        if(oldTime && oldTime.ms)
-            return oldTime.ms
-        return 0
-    }
     render(){
-        const {isPlaying, oldPlayinfo, showPlaybar} = this.props
+        const {isPlaying, showPlaybar, playlist, albumID, playOption, index, isLogin, token, isLoaded, isUpdated } = this.props
+        const albumInfo = this.props.albumInfo ? this.props.albumInfo : {ID:0, title:'My Playlist'}
+
         if(!showPlaybar)
             return (<View />)
         return(
@@ -169,25 +157,38 @@ class PlayingPage extends Component{
                     {...this._panResponder.panHandlers} >
                     <Animated.View style={this.getMinibarStyle()}>
                         <MiniPlaybar
+                            minibarSize ={minibarSize}
                             handleResume={AudioActions.resume}
-                            handlePause={AudioActions.pause}
+                            handlePause ={AudioActions.pause}
                             handleNext={AudioActions.next}
-                            getTime={this.getTime}
-
+                            isLoaded={isLoaded}
                             isPlaying={isPlaying}
-                            playinfo={oldPlayinfo}
+                            albumTitle={playlist[index].albumTitle?playlist[index].albumTitle:albumInfo.title}
+                            title={playlist[index].title}
+                            index={index}
                         />
                     </Animated.View>
                     <View style={styles.main} >
+                        <View style={{height:30, backgroundColor:'#fafafa'}}/>
+
+                        <View style={{height:50, backgroundColor:'#fafafa', alignItems:'center'}}>
+                            <Image style={{flex:1,resizeMode:'contain'}} source={require('../icon/scrollDown.png')} />
+                        </View>
                        <PlayingContainer
                             handleResume={AudioActions.resume}
                             handlePause={AudioActions.pause}
                             handleNext={AudioActions.next}
-                            getTime={this.getTime}
+                            handleUpdate={AudioActions.update}
+                            handleChangeOption={AudioActions.changeOption}
+                            isLogin={isLogin}
+                            isLoaded={isLoaded}
+                            index={index}
+                            albumInfo={albumInfo}
+                            playlist={playlist}
                             isPlaying={isPlaying}
-                            playinfo={oldPlayinfo}
-                            index={oldPlayinfo.index}
-                       />
+                            playOption={playOption}
+                            isUpdated={isUpdated}
+                        />
                     </View>
                     <View style={styles.bottomPadding} />
             </Animated.View>
@@ -201,6 +202,8 @@ const styles=StyleSheet.create({
         left:0,
         width:'100%',
         height:'200%',
+        borderColor:'black',
+        borderWidth:1
         //display:'none'
     },
     mini:{
@@ -209,7 +212,7 @@ const styles=StyleSheet.create({
     main:{
         width:'100%',
         height:'50%',
-        backgroundColor:'#ff0'
+        backgroundColor:'#fff'
     },
     bottomPadding:{
         width:'100%',
@@ -223,10 +226,17 @@ const styles=StyleSheet.create({
 
 
 export default connect(
-    ({audio})  =>({
-        isPlaying: audio.isPlaying,
-        showPlaybar: audio.showPlaybar,
-        oldPlayinfo: audio.oldPlayinfo,
-        oldTime: audio.oldTime
+    (state)  =>({
+        isPlaying: state.audio.isPlaying,
+        showPlaybar: state.audio.showPlaybar,
+        playlist: state.audio.playlist,
+        albumID: state.audio.albumID,
+        albumInfo: state.audio.playinfo,
+        index: state.audio.index,
+        playOption:state.audio.playOption,
+        isLogin: state.authentication.isLogin,
+        token: state.authentication.token,
+        isLoaded: state.audio.isLoaded,
+        isUpdated: state.audio.isUpdated
     })
 )(PlayingPage)

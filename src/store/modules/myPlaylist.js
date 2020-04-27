@@ -1,45 +1,98 @@
 import { createAction, handleActions } from 'redux-actions'
-import { MyPlaylistActions } from '../actionCreator'
 
 const LOAD = 'myPlaylist/LOAD'
 const UPDATE = 'myPlaylist/UPDATE'
-const DELETE_LIST = 'myPlaylist/DELETE_LIST'
-
+const DELETE_ITEM = 'myPlaylist/DELETE_ITEM'
+const APPEND_ITEM = 'myPlaylist/APPEND_ITEM'
+const REPLACE_ITEM = 'myPlaylist/REPLACE_ITEM'
+const TURN_TO_LOAD = 'myPlaylist/TURN_TO_LOAD'
 export const load = createAction(LOAD, value => value)
 export const update = createAction(UPDATE, value => value)
-export const deleteList = createAction(DELETE_LIST, value => value)
+export const deleteItem = createAction(DELETE_ITEM, value => value)
+export const appendItem = createAction(APPEND_ITEM, value => value)
+export const replaceItem = createAction(REPLACE_ITEM, value => value)
+export const turnToLoad = createAction(TURN_TO_LOAD, value => value)
 
-const isLoaded={success:false}
 const initialState = {
-    isLoaded:isLoaded,
+    isLoaded:false,
     list:[]
 }
+
+
+
 export default handleActions({
     [LOAD]: (state, {payload})=>{
-        const {token} = payload
-        setTimeout(()=>{
-            isLoaded.success=true
-            MyPlaylistActions.update(lists)
-        },3000)
-
-        return {
-            ...state,
-            isLoaded: state.isLoaded
-        }
+        const {list} = payload
+        if( list )
+            return {
+                list,
+                isLoaded:true
+            }
+        return { list:[], isLoaded:true }
     },
     [UPDATE]: (state, {payload}) =>{
         const {list} = payload
-        if(!state.isLoaded.success)
+        if(!list)
             return state
         return {
             ...state,
+            isLoaded:false,
             list
         }
     },
-    [DELETE_LIST]:(state, {payload}) => {
-        return state
+    [DELETE_ITEM]:(state, {payload}) => {
+        const {index} = payload
+        const {list} = state
+        console.warn('delete')
+        const frontList = list.slice(0,index)
+        const backList = list.slice(index+1,list.length).map(item=>{
+            return {...item, index:item.index-1}
+        })
+        return {
+            ...state,
+            isLoaded:false,
+            list:[...frontList, ...backList]
+        }
+    },
+    [APPEND_ITEM]:(state, {payload}) =>{
+        const {list} = state
+        const {items} = payload
+        const itemlist = items.map((item,index)=>{
+            const checkOverlap = (element) => element.ID === item.ID
+            const isOverlap = list.findIndex(checkOverlap)
+            if(isOverlap < 0)
+                return {...item, index:list.length+index+1}
+            return {...item, ID:Date.now() + ':' +item.ID, index:list.length+index+1}
+            
+        })
+        return {
+            ...state,
+            isLoaded:false,
+            list:[...list, ...itemlist]
+        }
+    },
+    [REPLACE_ITEM]:(state,{payload})=>{
+        const { list } = state
+        const { ind1, ind2 } = payload
+        
+        const list1 = list.slice(0, ind1)
+        const list2 = list.slice(ind1+1, ind2)
+        const list3 = list.slice(ind2+1, list.length )
+        console.warn('1:',list1)
+        console.warn('2:',list2)
+        console.warn('3:',list3)
+        return {
+            ...state,
+            isLoaded:false,
+            list:[...list1, list[ind2], ...list2, list[ind1], ...list3]
+        }
+    },
+    [TURN_TO_LOAD]:(state)=>{
+        return {
+            ...state,
+            isLoaded:true
+        }
     }
-
 }, initialState)
 
 

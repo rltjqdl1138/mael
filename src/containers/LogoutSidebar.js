@@ -84,16 +84,17 @@ const styles= StyleSheet.create({
         height:'100%',
     },
     signContainer:{
-        height: 80,
-        paddingTop:40,
-        paddingLeft:40,
+        height: 40,
+        paddingTop:10,
+        paddingLeft:20,
         flexDirection:'row',
         justifyContent:'center',
         alignItems:'center',
         alignSelf:'baseline'
     },
     loginContainer:{
-        height:'100%'
+        height:'100%',
+        borderWidth:0.5
     },
     signupContainer:{
         height:'100%'
@@ -112,18 +113,19 @@ const styles= StyleSheet.create({
 
 
     settingContainer:{
-        height:45,
+        height:40,
         margin:0,
         padding:0,
-        marginTop:20,
-        justifyContent:'flex-end'
+        marginTop:4,
+        justifyContent:'flex-end',
+        alignItems:'flex-end'
     },
     settingImage:{
         position:'absolute',
         right:0,
         bottom:0,
         height:'100%',
-        width:'40%',
+        width:'18%',
         resizeMode:'contain',
     },
 

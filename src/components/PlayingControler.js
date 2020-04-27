@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Text, Image } from 'react-native'
 import { connect } from 'react-redux'
 import { AudioActions } from '../store/actionCreator'
 import PlayingBar from './PlayingBar'
@@ -11,22 +11,37 @@ class PlayingControler extends Component{
             return (
                 <TouchableOpacity style={styles.buttonItem}
                     onPress={()=>{AudioActions.pause({infoNumber:1})}}>
-                    <Text> Pause </Text>
+                        <Image style={styles.buttonItemImage}
+                            source={require('../icon/pause.png')} />
                 </TouchableOpacity>
             )
         return (
             <TouchableOpacity style={styles.buttonItem}
                 onPress={()=>{AudioActions.resume({infoNumber:1})}}>
-                <Text> Resume </Text>
+                <Image style={styles.buttonItemImage}
+                    source={require('../icon/play.png')} />
             </TouchableOpacity>
         )
+    }
+    getOptionText = (op)=>{
+        switch(op){
+            case 0:
+                return '셔플재생'
+            case 1:
+                return '반복재생'
+            case 2:
+                return '순차재생'
+        }
     }
     getPlayingBar = (playinfo, isPlaying)=>{
         if(this.isFirst)
             return(
-                <View style={styles.timeContainer}>
-                    <Text style={styles.leftTimeText}>0:00</Text>
-                    <Text style={styles.rightTimeText}>0:00</Text>
+                <View style={{height:30,width:'100%'}}>
+                    <View style={{height:10}} />
+                    <View style={styles.timeContainer}>
+                        <Text style={styles.leftTimeText}>0:00</Text>
+                        <Text style={styles.rightTimeText}>0:00</Text>
+                    </View>
                 </View>
             )
         return(<PlayingBar playinfo={playinfo} infoNumber={1} isPlaying={isPlaying} theme='gray'/>)
@@ -42,7 +57,8 @@ class PlayingControler extends Component{
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.buttonItem}
                         onPress={()=>{AudioActions.changeOption()}}  >
-
+                        <Image source={require('../icon/changeOption.png')}
+                                style={styles.buttonItemImage} />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.buttonItem}
@@ -52,7 +68,8 @@ class PlayingControler extends Component{
                             else
                                 AudioActions.next({infoNumber:1, index})
                         }}>
-                        
+                        <Image style={styles.buttonItemImage}
+                            source={require('../icon/previous.png')} />
                     </TouchableOpacity>
 
                     {this.getButton(this.props)}
@@ -60,15 +77,19 @@ class PlayingControler extends Component{
                     <TouchableOpacity style={styles.buttonItem}
                         onPress={()=>{AudioActions.next({infoNumber:1}) }}>
                         
+                        <Image style={styles.buttonItemImage}
+                            source={require('../icon/next.png')} />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.buttonItem}
                         onPress={()=>{alert(index)}}>
+                        <Image source={require('../icon/add.png')}
+                            style={styles.buttonItemImage} />
                         
                     </TouchableOpacity>
                 </View>
                 <View style={styles.optionContainer}>
-                    <Text style={styles.optionText}>{playOption.option}</Text>
+                    <Text style={styles.optionText}>{this.getOptionText(playOption.option)}</Text>
                 </View>
             </View>
         )
@@ -82,7 +103,7 @@ const styles = StyleSheet.create({
         justifyContent:'center'
     },
     controlerContainer:{
-        height:20,
+        height:30,
         width:'100%'
     },
     buttonContainer:{
@@ -91,11 +112,24 @@ const styles = StyleSheet.create({
         paddingLeft:25,
         paddingRight:25
     },
-    buttonItem:{
+    buttonTestItem:{
         flex:1,
         height:'100%',
         borderWidth:1,
-        borderColor:'#000'
+        borderColor:'#000',
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    buttonItem:{
+        flex:1,
+        height:'100%',
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    buttonItemImage:{
+        width:'70%',
+        height:'70%',
+        resizeMode:'contain'
     },
 
     timeContainer:{
@@ -121,12 +155,13 @@ const styles = StyleSheet.create({
 
 
     optionContainer:{
-        height:30,
-        width:'100%'
+        height:40,
+        width:'100%',
+        justifyContent:'center'
     },
     optionText:{
         textAlign:'center',
-        color:'#777'
+        color:'#121111'
     },
     test1:{
         width:200,

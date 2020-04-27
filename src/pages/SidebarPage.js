@@ -7,6 +7,7 @@ import LogoutSidebar from '../containers/LogoutSidebar'
 import LoginSidebar from '../containers/LoginSidebar'
 import LoginSetting from '../containers/LoginSetting'
 import LogoutSetting from '../containers/LogoutSetting'
+import deviceCheck from '../deviceCheck'
 
 class MainComponent extends Component{
     render(){
@@ -119,6 +120,7 @@ class SidebarPage extends Component{
                     <View style={{backgroundColor:'#000', width :opa, height:'100%', position:'absolute', opacity:0.7}} />
                     
                     <View style={styles.main}>
+                        <View style={{height:deviceCheck.getTopPadding()}}/>
                         <MainComponent 
                             isLogin={isLogin}
                             username={username}

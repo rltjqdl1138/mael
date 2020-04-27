@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {View, StyleSheet, Text, TextInput, TouchableOpacity, Button, TouchableWithoutFeedback, Image} from 'react-native'
+import {View, StyleSheet, Text, TextInput, TouchableOpacity, Button, TouchableWithoutFeedback, Image, Keyboard} from 'react-native'
 
 
 import SimpleHeader from '../components/SimpleHeader'
@@ -10,7 +10,9 @@ export default class LoginContainer extends Component {
         this.state = {
             id:'',
             password:'',
-            checked:true }
+            checked:true,
+            notice:'',
+            isLoaded:true }
     }
     handleChange = (field, text) => 
         this.setState({ [field]: text });
@@ -28,9 +30,9 @@ export default class LoginContainer extends Component {
                 <SimpleHeader 
                     title="Sign in"
                     handler={()=>{navigator.pop('LoginPage')}}
-                    notice=''/>
+                    notice={this.state.notice}/>
 
-                <View style={styles.mainContainer}>
+                <View style={[styles.mainContainer,{opacity:this.state.isLoaded?1:0.5}]}>
                     <View style={styles.accountInform}>
                         <View style={styles.inputBoxContainer} >
                             <TextInput style={styles.inputBox}
@@ -46,7 +48,7 @@ export default class LoginContainer extends Component {
                                 secureTextEntry={true}
                                 onChangeText={text=>handleChange('password',text)}
                             />
-                        </View>
+                        </View>{/*
                         <View style={styles.checkBoxContainer}>
                             <TouchableOpacity
                                 style={styles.checkBox}
@@ -55,7 +57,7 @@ export default class LoginContainer extends Component {
                                     <View style={this.getCheckBoxStyle()}/>
                             </TouchableOpacity>
                             <Text style={styles.checkBoxText}>로그인 유지</Text>
-                        </View>
+                        </View>*/}
                     </View>
 
 
@@ -64,9 +66,24 @@ export default class LoginContainer extends Component {
                             {/*  TODO:추후 이미지(icon)로 교체  */}
                             <Button
                                 title="Enter"
-                                onPress={()=>{
-                                    handleLogin()
-                                    navigator.pop()
+                                onPress={async ()=>{
+                                    
+                                    if(this.state.id.length < 8)
+                                        return handleChange('notice','아이디는 8자리 이상입니다.')
+                                    else if(this.state.password === '')
+                                        return handleChange('notice','비밀번호를 입력해주세요')
+
+                                    Keyboard.dismiss()
+                                    handleChange('isLoaded',false)
+                                    const result = await handleLogin(this.state.id, this.state.password)
+                                    if(result){
+                                        this.setState(state=>({...state, notice:'', isLoaded:true}))
+                                        navigator.pop()
+                                    }
+                                    else{
+
+                                        this.setState(state=>({...state, notice:'아이디 혹은 비밀번호가 올바르지 않습니다.', isLoaded:true}))
+                                    }
                                 }}/> 
                         </View>
                     </View>

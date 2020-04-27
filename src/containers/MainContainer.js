@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import { StyleSheet, ScrollView, View, Text, Animated } from 'react-native';
 
-import MostlyContainer from './MostlyContainer'
 import ThemeContainer from './ThemeContainer'
 
 export default class MainContainer extends Component{
@@ -19,6 +18,7 @@ export default class MainContainer extends Component{
         }).start()
     }
     getStyle = () => [ styles.noticeContainer, {transform: [{translateY: this.translatedY}]} ]
+
     render(){
         const {navigator, option} = this.props
         return(
@@ -29,8 +29,7 @@ export default class MainContainer extends Component{
                         if(y==0) this.openNotice()}
                     }
                     onScrollBeginDrag={this.closeNotice} >
-                        <View style={{height:53}}/>
-                        <MostlyContainer navigator={navigator}/>
+                        <View style={{height:20}}/>
                         <ThemeContainer navigator={navigator}/>
                 </ScrollView>
                 <Animated.View style={this.getStyle()}>
@@ -46,7 +45,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height:'100%',
-        width:'100%'
+        width:'100%',
+    
     },
     noticeContainer:{
         position:'absolute',

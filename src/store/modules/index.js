@@ -1,16 +1,13 @@
 import { combineReducers } from 'redux'
-import athentication from './athentication'
+import authentication from './authentication'
 import navigator from './navigator'
-import mostly from './mostly'
 import theme from './theme'
 import sidebar from './sidebar'
 import audio from './audio'
 import myPlaylist from './myPlaylist'
-
 export default combineReducers({
-    athentication,
+    authentication,
     navigator,
-    mostly,
     theme,
     sidebar,
     audio,

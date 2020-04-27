@@ -9,57 +9,13 @@ import Theme from '../components/Theme'
 class ThemeContainer extends Component{
     constructor(){
         super()
-        this.handleUpdate()
     }
-    handleUpdate(){
-
-        // need Fetch 
-        
-        const list = [{
-            title:'Listen by Mood',
-            themeList:[{
-                TID:'1',
-                imageURL:'h',
-                title:'Sleepy' },{
-                TID:'2',
-                imageURL:'h',
-                title:'Dance' },{
-                TID:'3',
-                imageURL:'h',
-                title:'I dont no'
-            }]
-        },{
-            title:'Music Focus',
-            themeList:[{
-                TID:'4',
-                imageURL:'h',
-                title:'Jazz' },{
-                TID:'5',
-                imageURL:'h',
-                title:'Blues' },{
-                TID:'6',
-                imageURL:'h',
-                title:'I dont no'
-            }]
-        },{
-            title:'Listen by Language',
-            themeList:[{
-                TID:'7',
-                imageURL:'h',
-                title:'Korean English' },{
-                TID:'8',
-                imageURL:'h',
-                title:'English'
-            }]
-        }]
-        ThemeActions.update(list)
-    }
-    
     render(){
-        const {list} = this.props
+        const {list, navigator} = this.props
+
         return(
             <View style={styles.container}>
-                <ThemeItem list={list}/>
+                <ThemeItem list={list} navigator={navigator}/>
             </View>
         )
     }
@@ -80,21 +36,22 @@ const styles = StyleSheet.create({
 
 class ThemeItem extends Component{
     render(){
-        const {list} = this.props
+        const {list, navigator} = this.props
         const themeItems = !list ?
             (<Text> Blank </Text>):
-            list.map(
-                theme => {
-                    const {title, themeList} = theme
-                    return (
-                        <Theme
-                            key={title}
-                            themeList={themeList}
-                            title={title}
-                        />
-                    )
-                }
-            )
+            list.map( theme => {
+                const {ID, title, subTitle, list } = theme
+                if(!list || list.length === 0)
+                    return null
+                return (
+                    <Theme
+                        key={ID}
+                        themeList={list}
+                        title={title}
+                        subTitle={subTitle}
+                        navigator={navigator}
+                    />)
+            })
             return(
                 <View style={containerStyle.container}>
                     { themeItems }

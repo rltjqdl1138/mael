@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard } from 'react-native'
 
 import SimpleHeader from '../components/SimpleHeader'
-
+import {account} from '../networkHandler'
 
 export default class FindIDContainer extends Component {
     constructor(props){
@@ -12,7 +12,8 @@ export default class FindIDContainer extends Component {
             firstName: '',
             email: '',
             ifCorrect: false,
-            foundID:''
+            foundID:'',
+            notice:''
         }
     }
     handleChange = (field, text) => {
@@ -26,25 +27,40 @@ export default class FindIDContainer extends Component {
         else
             return '해당 정보와 일치하는 가입정보가 없습니다.'
     }
-    getID = ()=>{
-        const {state} = this
-        const {ifCorrect} = this.state
-        this.setState({
-            ...state,
-            foundID: ifCorrect? '':'kkk1138',
-            ifCorrect: !ifCorrect
-        })
+    getID = async ()=>{
+        Keyboard.dismiss()
+        const {lastName, firstName, email} = this.state
+        if(lastName==='' || firstName ==='' || email === '')
+            return this.setState(state=>({
+                ...state,
+                notice:'아래 정보를 모두 기입해주세요.',
+                ifCorrect: false
+            }))
+
+        const data = await account.getForgotID(lastName+firstName, email)
+        if(data && data.success && data.id)
+            this.setState(state=>({
+                ...state,
+                foundID: data.id,
+                notice:'',
+                ifCorrect: true  }))
+        else
+            this.setState(state=>({
+                ...state,
+                notice:'해당 정보와 일치하는 가입정보가 없습니다.',
+                ifCorrect: false
+            }))
     }
     render(){
         const {navigator} = this.props
-        const {handleChange, getNotice, getID} = this
+        const {handleChange, getID} = this
         return(
             <View style={styles.container}>
 
                 <SimpleHeader 
                     title="Forgot ID"
                     handler={()=>{navigator.pop('FindIDPage')}}
-                    notice={getNotice()}/>
+                    notice={this.state.notice}/>
 
                 <View style={styles.mainContainer}>
                     <View style={styles.informationContainer}>

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class HeaderContainer extends Component {
     render(){
-        const {handleSidebar, handlePop} = this.props
+        const {handleSidebar, handlePop, handleSearch} = this.props
         return(
             <View style={styles.container}>
                 <TouchableOpacity style={styles.menuContainer} onPress={handleSidebar}>
@@ -17,12 +17,13 @@ export default class HeaderContainer extends Component {
                         MAEL
                     </Text>
                 </TouchableOpacity>
-                <View style={styles.searchContainer}>
+                <TouchableOpacity style={styles.searchContainer}
+                    onPress={()=>{handleSearch(true)}}>
                     <Image
                         style={styles.searchImage}
                         source={require('../icon/search.png')}
                     />
-                </View>
+                </TouchableOpacity>
             </View>
 
         )
@@ -32,11 +33,11 @@ export default class HeaderContainer extends Component {
 const styles = StyleSheet.create({
     container:{
         width:'100%',
-        height:'100%',
+        height:60,
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 7
+        padding:5
     },
 
     // MENU BUTTON
@@ -47,8 +48,10 @@ const styles = StyleSheet.create({
         top:0,
         left:0,
         backgroundColor:'#fff',
-        alignItems: 'center',
-        justifyContent: 'flex-end'
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+
+        paddingTop:5
     },menuImage:{
         width:'100%',
         height:'80%',
@@ -77,7 +80,9 @@ const styles = StyleSheet.create({
         top:0,
         right:0,
         backgroundColor:'#fff',
-        alignItems: 'center',
+
+        paddingTop:5,
+        alignItems: 'flex-end',
         justifyContent: 'flex-end'
     },searchImage:{
         width:'100%',

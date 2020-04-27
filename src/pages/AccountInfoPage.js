@@ -15,32 +15,43 @@ export default class AccountInformationContainer extends Component{
         }
     }
     componentDidMount(){
-        setTimeout(()=>{
-            this.getInformation()
-        },3000)
+        fetch('http://192.168.0.23:3000/api/account/account',{
+                headers:{
+                    'x-access-token':this.props.token,
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if(!data.success)
+                    throw Error('error')
+                this.setState(state=>({
+                    ...state,
+                    ID: data.id,
+                    date: data.date,
+                    planType:data.stateID,
+                    isLoaded:true
+                }))
+            })
+            .catch((error) => {
+
+            });
     }
-    getInformation = ()=>{
-        const {state} = this
-        this.setState({
-            ...state,
-            ID:'kkk1138',
-            date:'2020.04.30',
-            planType:'Promo Code',
-            isLoaded:true
-        })
-    }
+    
     getNotice = ()=>{
         return ''
     }
+
     render(){
         const {navigator} = this.props
         const {ID, date, planType, isLoaded} = this.state
         return(   
             <View style={styles.container}>
                 <SimpleHeader 
-                    title="Forgot ID"
+                    title="계정 정보"
                     handler={()=>{navigator.pop('AccountInfoPage')}}
-                    notice={this.getNotice()}/>
+                    notice={this.getNotice()}
+                />
 
                 <View style={[styles.mainContainer,{opacity:isLoaded?1:0.5}]}>
                     <View style={styles.informContainer}>
@@ -89,9 +100,13 @@ export default class AccountInformationContainer extends Component{
                         <Text style={styles.noticeText}>
                             플랜 옵션을 변경하고 싶으신가요?
                         </Text>
-                        <Text style={styles.noticeText}>
-                            플랜 옵션 변경하기를 눌러 진행해주세요.
-                        </Text>
+                        <View style={{flexDirection:'row'}}>
+                            <TouchableOpacity onPress={()=>{this.props.navigator.push('PlanPage')}}>
+                                <Text style={[styles.noticeText,{color:'#FF6E43', marginRight:-5}]}>플랜 옵션 변경하기</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.noticeText}>를 눌러 진행해주세요.</Text>
+
+                        </View>
                     </View>
 
                 </View>

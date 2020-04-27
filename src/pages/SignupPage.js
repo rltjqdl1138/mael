@@ -1,7 +1,9 @@
 import React, {Component} from 'react'
-import {View, StyleSheet, Text, TextInput, ScrollView, Button, Picker, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
+import {View, StyleSheet, Text, TextInput, ScrollView, Button, Picker, TouchableOpacity, Keyboard} from 'react-native'
 import SimpleHeader from '../components/SimpleHeader'
 import deviceCheck from '../deviceCheck'
+import networkHandler from '../networkHandler'
+
 
 const size12 = deviceCheck.getFontSize(12)
 const size14 = deviceCheck.getFontSize(14)
@@ -16,11 +18,86 @@ export default class SignupPage extends Component {
             password:'',
             passwordCheck:'',
             email:'',
-            phoneFirst:'082',
+            phoneFirst:'001',
             phone:'',
             phoneCheck:'',
             isPickerOpen:false,
-            isFocused:false
+            isFocused:false,
+            isKeyboardOpen:false,
+            idNotice:'',
+            passwordNotice:'',
+            mobileNotice:''
+        }
+    }
+
+    componentDidMount() {
+		this._keyboardWillShowSubscription = Keyboard.addListener('keyboardDidShow', (e) => this._keyboardWillShow(e));
+		this._keyboardWillHideSubscription = Keyboard.addListener('keyboardDidHide', (e) => this._keyboardWillHide(e));
+	}
+	componentWillUnmount() {
+		this._keyboardWillShowSubscription.remove();
+		this._keyboardWillHideSubscription.remove();
+	}
+	_keyboardWillShow(e) {
+        this.setState(state=>({...state, height: e.endCoordinates.height}));
+        this.handleChange('isKeyboardOpen',true)
+	}
+	_keyboardWillHide(e) {
+		this.setState(state=>({...state, height: 0}));
+        this.handleChange('isKeyboardOpen',false)
+    }
+    
+    async getIDNotice(){
+        const {id} = this.state;
+        if(!id || id==='')
+            return this.handleChange('idNotice','')
+        else if(id.length < 8)
+            return this.handleChange('idNotice', 'ID는 8자리 이상이어야 합니다.')
+        else if(id.length >16)
+            return this.handleChange('idNotice', 'ID는 16자리 이하여야 합니다.')
+
+        const result = await networkHandler.account.getCheckID()
+        if(result && result.success)
+            return this.handleChange('idNotice', id+'는 사용 가능한 ID입니다.')
+        return this.handleChange('idNotice', id+'는 이미 사용중인 아이디 입니다.')
+    }
+    async getPasswordNotice(){
+
+    }
+    async getMobileNotice(){
+
+    }
+    getPicker = ()=>{
+        if(deviceCheck.ifIOS){
+            return(
+                <View style={[styles.pickerContainer, {display:this.state.isPickerOpen?'flex':'none'}]}>
+                    <Picker style={{width:'100%', height:'100%'}}
+                        itemStyle={{fontSize: 13, color:'#121111'}}
+                        selectedValue={this.state.phoneFirst}
+                        onValueChange={text=>this.handleChange('phoneFirst',text)} >
+                            <Picker.Item label="001" value="001" />
+                            <Picker.Item label="002" value="002" />
+                            <Picker.Item label="003" value="003" />
+                            <Picker.Item label="004" value="004" />
+                            <Picker.Item label="005" value="005" />
+                            <Picker.Item label="006" value="006" />
+                    </Picker>
+                </View>
+            )
+        }else{
+            return(
+                    <Picker style={styles.androidPickerContainer}
+                        selectedValue={this.state.phoneFirst}
+                        onValueChange={text=>this.handleChange('phoneFirst',text)} >
+                        <Picker.Item label="한국" value="001" />
+                        <Picker.Item label="미국" value="002" />
+                        <Picker.Item label="003" value="003" />
+                        <Picker.Item label="004" value="004" />
+                        <Picker.Item label="005" value="005" />
+                        <Picker.Item label="006" value="006" />
+                    </Picker>
+                
+            )
         }
     }
     handleChange = (field, text) => {
@@ -37,9 +114,11 @@ export default class SignupPage extends Component {
                 <SimpleHeader 
                     title="Sign up"
                     handler={()=>{navigator.pop('SignupPage')}}
+                    disableNotice={true}
                     notice=''/>
 
-                <ScrollView style={styles.mainContainer}>
+                <ScrollView style={styles.mainContainer}
+                    onScrollBeginDrag={()=>{handleChange('isPickerOpen',false)}}>
                     <View style={styles.accountInform}>
                         <Text style={styles.subtitle} >회원 정보</Text>
                         <View style={styles.inputBoxContainer} >
@@ -47,8 +126,6 @@ export default class SignupPage extends Component {
                                 placeholder="성"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('firstName',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                         <View style={styles.simplePadding}/>
@@ -57,8 +134,6 @@ export default class SignupPage extends Component {
                                 placeholder="이름"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('lastName',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                     </View>
@@ -71,8 +146,6 @@ export default class SignupPage extends Component {
                                 placeholder="ID"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('id',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                         <View style={styles.textPadding}>
@@ -86,8 +159,6 @@ export default class SignupPage extends Component {
                                 placeholderTextColor='#888'
                                 secureTextEntry={true}
                                 onChangeText={text=>handleChange('password',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                         <View style={styles.simplePadding}/>
@@ -97,13 +168,13 @@ export default class SignupPage extends Component {
                                 placeholderTextColor='#888'
                                 secureTextEntry={true}
                                 onChangeText={text=>handleChange('passwordCheck',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                         <View style={styles.textPadding}>
                             <Text style={styles.okText} >
-                                비밀번호가 일치합니다
+                                {this.state.password !==''&& this.state.password === this.state.passwordCheck?
+                                "비밀번호가 일치합니다.":
+                                "비밀번호가 일치하지 않습니다."}
                             </Text>
                         </View>
                     </View>
@@ -116,8 +187,6 @@ export default class SignupPage extends Component {
                                 placeholder="이메일"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('email',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
                         <View style={styles.simplePadding}/>
@@ -138,8 +207,6 @@ export default class SignupPage extends Component {
                                 placeholder="휴대전화"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('phone',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
 
@@ -150,8 +217,6 @@ export default class SignupPage extends Component {
                                 keyboardType="number-pad"
                                 placeholderTextColor='#888'
                                 onChangeText={text=>handleChange('phoneCheck',text)}
-                                onFocus={()=>handleChange('isFocused',true)}
-                                onEndEditing={()=>handleChange('isFocused',false)}
                             />
                         </View>
 
@@ -160,18 +225,7 @@ export default class SignupPage extends Component {
                                 인증확인되었습니다
                             </Text>
                         </View>
-                        <View style={[styles.pickerContainer, {display:this.state.isPickerOpen?'flex':'none'}]}>
-                            <Picker style={{width:'100%', height:'100%'}}
-                                selectedValue={this.state.phoneFirst}
-                                onValueChange={text=>handleChange('phoneFirst',text)} >
-                                    <Picker.Item label="00001" value="001" />
-                                    <Picker.Item label="00002" value="002" />
-                                    <Picker.Item label="00003" value="003" />
-                                    <Picker.Item label="00004" value="004" />
-                                    <Picker.Item label="00005" value="005" />
-                                    <Picker.Item label="00006" value="006" />
-                            </Picker>
-                        </View>
+                        {this.getPicker()}
                         <View style={styles.simplePadding}/>
                     </View>
 
@@ -184,7 +238,7 @@ export default class SignupPage extends Component {
                         /> 
                         </View>
                     </View>
-                    <View style={{width:'100%',height:this.state.isFocused?300:40}} />
+                    <View style={{width:'100%',height:this.state.height}} />
                 </ScrollView>
 
             </View>
@@ -300,12 +354,23 @@ const styles=StyleSheet.create({
     pickerContainer:{
         position:'absolute',
         left:20,
-        top:60,
+        top:70,
         width:70,
-        height:200,
+        height:180,
         backgroundColor:'#fff',
         borderWidth:1,
         borderRadius:10,
+        borderColor:'#000'
+    },
+    androidPickerContainer:{
+        position:'absolute',
+        left:34,
+        top:143,
+        width:52,
+        height:40,
+        backgroundColor:'#fff',
+        borderWidth:1,
+        borderRadius:15,
         borderColor:'#000'
     },
 

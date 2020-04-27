@@ -1,152 +1,69 @@
 import React, {Component} from 'react'
 import { View, TouchableOpacity, StyleSheet, Text, Image, ScrollView, Dimensions } from 'react-native'
 import {connect} from 'react-redux'
-
+import networkHandler from '../networkHandler'
+import CacheManager from '../CacheManager'
+import {AudioActions, MyPlaylistActions} from '../store/actionCreator'
 import MusicPlayList from '../components/MusicPlayList'
-import AlbumControler from '../components/AlbumControler'
 const {height, width} = Dimensions.get('window')
-
-
-const shapeofyou = `The club isn't the best place to find a lover
-So the bar is where I go
-Me and my friends at the table doing shots
-Drinking fast and then we talk slow
-Come over and start up a conversation with just me
-And trust me I'll give it a chance now
-Take my hand, stop, put Van the Man on the jukebox
-And then we start to dance, and now I'm singing like
-Girl, you know I want your love
-Your love was handmade for somebody like me
-Come on now, follow my lead
-I may be crazy, don't mind me
-Say, boy, let's not talk too much
-Grab on my waist and put that body on me
-Come on now, follow my lead
-Come, come on now, follow my lead
-I'm in love with the shape of you
-We push and pull like a magnet do
-Although my heart is falling too
-I'm in love with your body
-And last night you were in my room
-And now my bedsheets smell like you
-Every day discovering something brand new`
-
-const faded = `You were the shadow to my light
-Did you feel us
-Another start
-You fade away
-Afraid our aim is out of sight
-Wanna see us
-Alive
-Where are you now
-Where are you now
-Where are you now
-Was it all in my fantasy
-Where are you now
-Were you only imaginary
-Where are you now
-Atlantis
-Under the sea
-Under the sea
-Where are you now
-Another dream
-The monsters running wild inside of me
-I'm faded
-I'm faded
-So lost
-I'm faded
-I'm faded
-So lost
-I'm faded
-These shallow waters, never met
-What I needed
-I'm letting go
-A deeper dive
-Eternal silence of the sea
-I'm breathing
-Alive
-Where are you now
-Where are you now
-Under the bright
-But…`
-
-
-const lists = [
-    {
-        index:1,
-        title:'Base 2 Base',
-        lyric:faded,
-        lyricLine:38,
-        lyricHeight:0,
-        url:'base2base'
-    },
-    {
-        index:2,
-        title:'Evans',
-        lyric:shapeofyou,
-        lyricLine:20,
-        lyricHeight:0,
-        url:'evans'
-    },
-    {
-        index:3,
-        title:'Flower',
-        lyric:'Tree Under Stars 가사',
-        lyricLine:1,
-        lyricHeight:0,
-        url:'flower'
-    },
-    {
-        index:4,
-        title:'Heavenly Moon',
-        lyric:'Say Your Feelings 가사',
-        lyricLine:1,
-        lyricHeight:0,
-        url:'heavenlymoon'
-    },
-
-    {
-        index:5,
-        title:'Far ease Nightbird',
-        lyric:'Jungle Hunters 가사',
-        lyricLine:1,
-        lyricHeight:0,
-        url:'nightbird'
-    },
-
-    {
-        index:6,
-        title:'Polaris',
-        lyric:'We are Family 가사',
-        lyricLine:1,
-        lyricHeight:0,
-        url:'polaris'
-    }
-]
 export default class AlbumContainer extends Component{
     render(){
-        return <Album_Container title={this.props.config.title}/>
+        return <Album_Container title={this.props.config.title} albumID={this.props.config.albumID}/>
     }
 }
 class album_Container extends Component {
     constructor(props){
         super(props)
-        if(props.list)
-            this.state = {musicPlaylist: props.list, totalHeight: props.list.length*74}
-        else
-            this.state = {musicPlaylist:lists, totalHeight:lists.length*74}
+        this.state = {musicPlaylist: [], totalHeight: 60, albumInfo:{}}
+    }
+    handleAddPlaylist(items){
+        const {myPlaylist} = this.props
+        const itemlist = items.map((item,index)=>{
+            const albumTitle = this.state.albumInfo ? this.state.albumInfo.title : undefined
+            const checkOverlap = (element) => element.ID === item.ID
+            const isOverlap = myPlaylist.findIndex(checkOverlap)
+            if(isOverlap < 0)
+                return {...item, index:myPlaylist.length+index+1, albumTitle}
+            return {...item, ID:Date.now() + ':' +item.ID, index:myPlaylist.length+index+1,
+                albumTitle}
+        })
+        const result = [...myPlaylist, ...itemlist]
+        MyPlaylistActions.update({list:result})
+        if(this.props.playingAlbumID===0)
+            AudioActions.update({albumID:0, list:result, index:this.props.index})
+    }
+    componentDidMount(){
+        const {albumID} = this.props;
+        (async()=>{
+            const data = await networkHandler.music.getMusicList(albumID)
+            if(!data || !data.musics || !data.album)
+                console.warn(data)
+            else{
+                this.setState(state=>({
+                    ...state,
+                    albumInfo: data.album,
+                    musicPlaylist: data.musics,
+                    totalHeight: data.musics.length*74 + 60 }))
+                }
+                data.musics.map( async (item) => {
+                    if(!item.uri) return;
+                    return await CacheManager.music.getMusicFromCache(item.uri)
+                })
+        })()
+
     }
     handleOpenLyric = (index)=>{
-        const {musicPlaylist, totalHeight} = this.state
+        const {musicPlaylist} = this.state
         if( index > musicPlaylist.length || index < 0)
             return
         const newList = [...musicPlaylist]
-        const length = newList[index].lyricLine*20 + 42
+        const length = newList[index].lyricLine*21 + 42
         newList[index].lyricHeight = length
-        this.setState({
+        this.setState(state=>({
+            ...state,
             musicPlaylist: newList,
-            totalHeight:totalHeight + length
-        })
+            totalHeight:state.totalHeight + length
+        }))
     }
     handleCloseLyric = (index)=>{
         const {musicPlaylist, totalHeight} = this.state
@@ -156,26 +73,15 @@ class album_Container extends Component {
         const length = musicPlaylist[index].lyricHeight
         newList[index].lyricHeight = 0
 
-        this.setState({
+        this.setState(state=>({
+            ...state,
             musicPlaylist: newList,
             totalHeight: totalHeight - length
-        })
+        }))
     }
-    getTime = () =>{
-        const {newTime} = this.props
-        if(newTime && newTime.ms)
-            return newTime.ms
-        return 0
-    }
-    getAlbumArt = (title) =>{
-        if(title === 'MyPlaylist')
-            return(<View style={styles.titleContainer}>
-                <Text style={styles.title}>
-                    MyPlaylist
-                </Text>
-            </View>)
+    getAlbumArt = (title,) =>{
         return (
-            <View>
+            <View style={styles.albumContainer}>
                 <View style={styles.albumArtContainer}>
                     <Image style={styles.circle}
                         source={require('../image/circle.jpg')}
@@ -184,41 +90,70 @@ class album_Container extends Component {
                         source={require('../image/owl2.jpg')}
                     />
                 </View>
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.info}>
-                                Mostly Series > Mostly Animals
-                        </Text>
+                <View style={styles.titleContainer}>
+                        
                     <Text style={styles.title}>
-                                {title}
+                        {title}
                     </Text>
+                    <Text style={styles.artist}>
+                        Artist name here
+                    </Text>
+                    <TouchableOpacity style={{flex:1}}
+                        onPress={()=>{this.handleAddPlaylist(this.state.musicPlaylist); alert('리스트에 추가되었습니다') }}
+                        >
+                        <Image style={{width:50,height:50,resizeMode:'contain', alignSelf:'flex-end'}}
+                            source={require('../icon/add.png')} />
+                    </TouchableOpacity>
                 </View>
+                
             </View>)
     }
     render(){
         const {handleOpenLyric, handleCloseLyric} = this
-        const {musicPlaylist, totalHeight} = this.state
-
-        const { isPlaying, playinfo, newTime, title } = this.props
-        const { list, index } = playinfo
+        const {musicPlaylist, totalHeight, albumInfo} = this.state
+        const { title, isLogin, index, albumID, playingAlbumID, isPlaying, isLoaded } = this.props
+        const isDisabled = playingAlbumID === albumID
         return (
             <View style={styles.container}>
-                <ScrollView style={styles.scroll}>
-                    <View style={styles.playbarContainer}>
-                        <AlbumControler 
-                            title={title}
-                            list={musicPlaylist}
-                            getTime={this.getTime}
-                            index={index}
-                        />
-                    </View>
+                <ScrollView style={styles.scroll}
+                    showsHorizontalScrollIndicator={false}>
                     {this.getAlbumArt(title)}
-                    
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={[styles.playButtonContainer,{opacity:isDisabled?0.5:1}]}
+                            disabled={isDisabled}
+                            onPress={()=>{
+                                AudioActions.update({albumID, index:1, list:musicPlaylist, info:albumInfo}) }}>
+                            <Image source={require('../icon/playbutton.png')}
+                                style={styles.playButton}/>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.shffleButtonContainer}
+                            onPress={()=>{
+                                AudioActions.pause()
+                            }}
+                            >
+                            <Image source={require('../icon/shufflebutton.png')}
+                                style={styles.shffleButton}/>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.paddingContainer}>
+                        <Text style={styles.paddingText}>Song List</Text>
+                    </View>
                     <MusicPlayList
+                        isLogin={isLogin}
                         musiclist={musicPlaylist}
-                        index={index}
+                        albumInfo={albumInfo}
+                        playingAlbumID={playingAlbumID}
+                        index={index+1}
                         totalHeight={totalHeight}
                         handleOpenLyric={handleOpenLyric}
                         handleCloseLyric={handleCloseLyric}
+                        handleNext={AudioActions.next}
+                        handleResume={AudioActions.resume}
+                        handlePause={AudioActions.pause}
+                        handleUpdate={AudioActions.update}
+                        isPlaying={isPlaying}
+
+                        isLoaded={isLoaded}
                     />
                 </ScrollView>
             </View>
@@ -230,10 +165,14 @@ class album_Container extends Component {
 
 
 export const Album_Container = connect(
-    ({audio})  =>({
-        playinfo: audio.newPlayinfo,
+    ({audio, authentication, myPlaylist})  =>({
         isPlaying: audio.isPlaying,
-        newTime: audio.newTime
+        playingAlbumID: audio.albumID,
+        index: audio.index,
+        isLogin: authentication.isLogin,
+        token: authentication.token,
+        isLoaded: audio.isLoaded,
+        myPlaylist: myPlaylist.list
     })
   )(album_Container)
 
@@ -243,36 +182,36 @@ const styles = StyleSheet.create({
         height:'100%',
         backgroundColor:'#fff',
         alignItems: 'center',
+        paddingLeft:20,
+        paddingRight:20
     },
     scroll:{
         width:'100%',
         height:'100%'
     },
-    playbarContainer:{
-        height:120,
-        width:'100%',
-        backgroundColor:'#fff'
-    },
 
     // ALBUM ART
     albumContainer:{
-        alignItems: 'center',
-        justifyContent: 'center',
-        height:width*0.7,
+        height:width*0.5,
         backgroundColor:'#fff',
         width:'100%',
+        flexDirection:'row'
     },
     albumArtContainer:{
-        width:'100%',
-        height:width*0.45,
+        width:width*0.5,
+        height:width*0.5,
         alignItems: 'center',
         justifyContent: 'center',
+        paddingRight:20,
+        paddingTop:20
     },
     circle:{
         position:'absolute',
         width:'100%',
         height:'100%',
-        resizeMode:'contain'
+        resizeMode:'contain',
+        borderColor:'black',
+        borderWidth:1,
     },
     albumArt:{
         position:'absolute',
@@ -283,20 +222,53 @@ const styles = StyleSheet.create({
 
     // TITLE
     titleContainer:{
-        width:'100%',
-        height:80,
-        alignContent:'center',
-        justifyContent:'center'
+        flex:1,
+        paddingTop:20,
+        paddingBottom:20,
+        paddingLeft:10
     },
-    info:{
-        textAlign:'center',
-        fontSize:12,
+    artist:{
+        fontSize:13,
         color:'#767171'
-        
     },
     title:{
-        textAlign:'center',
-        fontSize:20
+        fontSize:18,
+        fontWeight:'600'
     },
+    buttonContainer:{
+        height:width/6,
+        width:'100%',
+        flexDirection:'row',
+        justifyContent:'center'
+    },
+    playButtonContainer:{
+        flex:1,
+        paddingLeft:20,
+        paddingRight:10
+    },
+    shffleButtonContainer:{
+        flex:1,
+        paddingRight:20,
+        paddingLeft:10
+    },
+    playButton:{
+        height:'100%',
+        width:'100%',
+        resizeMode:'contain'
+    },
+    shffleButton:{
+        height:'100%',
+        width:'100%',
+        resizeMode:'contain'
 
+    },
+    paddingContainer:{
+        padding:10,
+        height:40
+    },
+    paddingText:{
+        fontWeight:'normal',
+        color:'#121111',
+        //color:'#767171'
+    }
 })

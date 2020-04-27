@@ -103,7 +103,7 @@ const styles= StyleSheet.create({
         height:45,
         margin:0,
         padding:0,
-        marginTop:20,
+        marginTop:10,
         justifyContent:'flex-end'
     },
     settingImage:{

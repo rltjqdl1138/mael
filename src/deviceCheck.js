@@ -33,6 +33,15 @@ class deviceCheck{
         else
             return size /PixelRatio.getFontScale()
     }
+
+    getTopPadding = ()=>{
+        if(this.ifIOS && this.ifTopbarless)
+            return 35
+        else if(this.ifIOS)
+            return 15
+        else
+            return 52
+    }
 }
 
 export default new deviceCheck()

@@ -14,7 +14,7 @@ export default class SidebarBanner extends Component{
 const styles = StyleSheet.create({
     container:{
         width: width*0.7,
-        height: width*0.7*0.35,
+        height: width*0.7*0.325,
         backgroundColor:'#000'
     }
 })

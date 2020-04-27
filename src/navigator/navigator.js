@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {StyleSheet, View, Animated, Dimensions } from 'react-native'
+import {StyleSheet, View, Animated, Dimensions, BackHandler } from 'react-native'
 import { connect } from 'react-redux'
 
 
@@ -21,12 +21,12 @@ const buildSceneConfig = (children = [])=>{
 }
 
 
-export class Navigator extends Component {
+class Navigator extends Component {
     constructor(props){
+
         super(props)
         const sceneConfig = buildSceneConfig(props.children)
         const initialSceneName = props.children[0].props.name
-
         if(this.props.firstConfig)
             sceneConfig[initialSceneName].config = this.props.firstConfig
         
@@ -50,6 +50,8 @@ export class Navigator extends Component {
         const width = Dimensions.get('window').width
         const { stack } = this.state
         const ind = stack.findIndex(isThere)
+
+    //BackHandler.addEventListener("hardwareBackPress", ()=>{this.handlePop(sceneName); return true})
         if(ind === -1){
             this.state.sceneConfig[sceneName].config = config
             this.setState(state => ({
@@ -77,7 +79,7 @@ export class Navigator extends Component {
     handlePop = (sceneName) =>{
         const isThere = (element) => element['key'] === sceneName
         const { width } = Dimensions.get('window')
-        const {stack} = this.state
+        const { stack } = this.state
         const ind = stack.findIndex(isThere)
         Animated.timing(this._animatedValue,{
             toValue: width,
@@ -87,12 +89,16 @@ export class Navigator extends Component {
             this._animatedValue.setValue(0)
             this.setState(state =>{
                 if(!sceneName || sceneName==="" || ind===-1){
+                    //BackHandler.addEventListener("hardwareBackPress", ()=>{return false})
                     return {
                         ...state,
                         stack: stack.slice(0, 1)
                     }
                 }
                 else if(stack.length > ind){
+                    //BackHandler.addEventListener("hardwareBackPress", ()=>{
+                    //    this.handlePop(stack[ind-1].key)
+                    //    return false})
                     return {
                         ...state,
                         stack: stack.slice(0, ind)
@@ -108,7 +114,6 @@ export class Navigator extends Component {
         return stack.slice(ind, stack.length)
     }
     render(){
-
         return (
             <View style={styles.container}>
                 {this.state.stack.map((scene, index)=>{
@@ -129,6 +134,7 @@ export class Navigator extends Component {
                                 navigator={{push:this.handlePush, pop:this.handlePop}}
                                 config={scene.config}
                                 handler={this.handler}
+                                token={this.props.token}
                             />
                         </Animated.View>
                     )
@@ -153,9 +159,10 @@ const styles = StyleSheet.create({
 
 
 
-export default connect(
+exports.Navigator =  connect(
     (state)  =>({
         isSidebarOpen: state.navigator.isSidebarOpen,
-        navList: state.navigator.navList
+        navList: state.navigator.navList,
+        token: state.authentication.token
     })
 )(Navigator)

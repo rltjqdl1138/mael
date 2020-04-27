@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import {View, StyleSheet, TouchableOpacity, Image, Text, Animated} from 'react-native'
+import deviceCheck from '../deviceCheck'
 
 export default class SimpleHeader extends Component {
     handleClose = () =>{
@@ -16,29 +17,43 @@ export default class SimpleHeader extends Component {
     }
     noticeY = new Animated.Value(-43);
     getNoticeStyle = () => [styles.noticeStyle, {transform:[{translateY:this.noticeY}] }]
+    
     render(){
-        const {title, handler, notice} = this.props
+        const {title, handler, notice, handleComplete, disableNotice} = this.props
+        const WholeSize = deviceCheck.getTopPadding() + (disableNotice?60:103)
+
         if(notice === '') this.handleClose()
-        else this.handleOpen()
+            else this.handleOpen()
         return (
-            <View style={styles.headerContainer}>
-                <Animated.View style={this.getNoticeStyle()}>
-                    <Text style={styles.noticeText}> {notice} </Text>
-                </Animated.View>
+            <View style={[styles.container,{height:WholeSize}]}>
+                    
+                <View style={{height:deviceCheck.getTopPadding()}}/>
+                <View style={[styles.headerContainer,{height:disableNotice?60:103}]}>
+                    <Animated.View style={[this.getNoticeStyle(),{display: disableNotice?'none':'flex'}]}>
+                        <Text style={styles.noticeText}> {notice} </Text>
+                    </Animated.View>
 
-                <View style={styles.blank} />
-                <View style={styles.mainContainer} >
-                    <TouchableOpacity style={styles.backButtonContainer}
-                        onPress={handler}  >
-                        <Image style={styles.backButtonImage}
-                            source={require('../icon/back.png')}  />
-                    </TouchableOpacity>
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.title}>
-                            {title}
-                        </Text>
+                    <View style={[styles.blank,{height:disableNotice?0:43}]} />
+                    <View style={styles.mainContainer} >
+                        <TouchableOpacity style={styles.backButtonContainer}
+                            onPress={handler}  >
+                            <Image style={styles.backButtonImage}
+                                source={require('../icon/back.png')}  />
+                        </TouchableOpacity>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>
+                                {title}
+                            </Text>
+                        </View>
+                        <TouchableOpacity style={[styles.completeButton, {display:handleComplete?'flex':'none'}]}
+                            onPress={()=>{
+                                    if(handleComplete) handleComplete()
+                                    handler()
+                                }}>
+                            <Text style={{fontSize:16}}>완료</Text>
+                        </TouchableOpacity>
                     </View>
-
+                    
                 </View>
 
             </View>
@@ -47,10 +62,12 @@ export default class SimpleHeader extends Component {
 }
 
 const styles=StyleSheet.create({
-    headerContainer:{
-        height:103,
+    container:{
         width:'100%',
-        flexDirection:'column-reverse'
+    },
+    headerContainer:{
+        width:'100%',
+        flexDirection:'column-reverse',
     },
     mainContainer:{
         height:60,
@@ -67,7 +84,7 @@ const styles=StyleSheet.create({
         height:43,
         width:'100%',
         backgroundColor:'#f99',
-        justifyContent:'center'
+        justifyContent:'center',
     },
     noticeText:{
         fontSize:14,
@@ -97,7 +114,13 @@ const styles=StyleSheet.create({
         textAlign:'center',
         color:'#121111'
     },
-
+    completeButton:{
+        position:'absolute',
+        width:50,
+        height:'100%',
+        justifyContent:'center',
+        right:0,
+    },
     blank:{
         height:43,
         width:'100%'
