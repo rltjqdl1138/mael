@@ -1,8 +1,11 @@
 import React, {Component} from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Image, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, TouchableHighlight, StyleSheet, Image, ScrollView, Dimensions } from 'react-native'
+import networkHandler from '../networkHandler'
+import deviceCheck from '../deviceCheck'
 
+import { PaymentInput, PaymentItem } from '../components/PaymentInfo'
 import SimpleHeader from '../components/SimpleHeader'
-
+const {height} = Dimensions.get('window')
 const sub = {
     id:0,
     type:0,
@@ -20,17 +23,17 @@ export default class PlanPage extends Component {
         this.state = {
             notice:'정보를 받아오고 있습니다.',
             plans:[],
-            isOpen:false,
+            isModalOpen:false,
             index:0,
-            code:'',
-            card:{num:'', date:'', cvc:''},
             isLoaded:false
         }
         this.codeLength = 0
     }
+
     componentDidMount(){
         const notice = '모든 플랜 옵션은 변경 시, 익월 부터 적용됩니다. 정기 구독의 경우 언제든 취소가 가능합니다.'
         const plans = [sub, promo]
+        
         setTimeout(()=>{
             this.setState(state=>({
                 ...state,
@@ -44,12 +47,10 @@ export default class PlanPage extends Component {
             [field]: text
         });
     }
-    getNotice = ()=>{
-        return ''
-    }
+
     getModal = (items) =>{
-        const {isOpen, plans} = this.state
-        if(!isOpen)
+        const {isModalOpen, plans} = this.state
+        if(!isModalOpen)
             return null
         return (
             <View style={[styles.selectBoxContainer,{
@@ -66,29 +67,36 @@ export default class PlanPage extends Component {
     render(){
         const {navigator} = this.props
         const {handleChange, getNotice, getID} = this
-        const {notice, isOpen, plans, index, isLoaded} = this.state
+        const {notice, isOpen, isModalOpen, plans, index, isLoaded, list} = this.state
+        
+
         const items = plans.map((item,ind)=>(
                 <TouchableOpacity style={{width:'100%',height:50, justifyContent:'center'}}
-                    onPress={()=>{this.setState(state=>({...state, isOpen:false, index:ind}))}}
+                    onPress={()=>{this.setState(state=>({...state, isModalOpen:false, index:ind}))}}
                     key={item.id}>
                     <Text style={{fontSize:13,color:index===ind?'#FF6E43':'#121111'  }}>{item.info}</Text>
                 </TouchableOpacity>
             ))
+
         return(
             <View style={styles.container}>
                 <SimpleHeader 
                     title="플랜 변경"
                     handler={()=>{navigator.pop('PlanPage')}}
                     notice=''
-                    handleComplete={()=>{alert('complete')}}/>
+                    handleComplete={{
+                        title: '다음',
+                        handler:()=>{navigator.push('PlanPage2',{
+                            plan:plans[index] })}
+                    }}/>
                 <ScrollView contentContainerStyle={styles.mainContainer}
                     keyboardShouldPersistTaps='handled'
-                    onScrollBeginDrag={()=>handleChange('isOpen',false)}
+                    onScrollBeginDrag={()=>handleChange('isModalOpen',false)}
                     scrollEnabled={false}>
                     <View style={styles.upperContainer}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.titleText}>
-                                플랜 옵션    
+                                플랜 옵션
                             </Text>
                         </View>
                         <View style={styles.noticeContainer}>
@@ -97,20 +105,15 @@ export default class PlanPage extends Component {
                             </Text>
                         </View>
                         <TouchableOpacity style={styles.selectContainer}
-                            onPress={()=>{handleChange('isOpen',!isOpen)}}>
+                            onPress={()=>{handleChange('isModalOpen',!isModalOpen)}}>
                                 <Text style={styles.selectText}>
                                     { (plans[index] && plans[index].info)?plans[index].info:''}
                                 </Text>
                             <View style={styles.selectButton}>
                                 <Image style={styles.selectButtonImage}
-                                    source={require('../icon/lyric.png')} />
+                                    source={require('../icon/countryCode.png')} />
                             </View>
                         </TouchableOpacity>
-
-                        <CreditInfo type={plans[index]?plans[index].type : undefined}
-                            handleChange={handleChange}
-                            code={this.state.code}
-                            card={this.state.card} />
                     </View>
                 </ScrollView>
                 {this.getModal(items)}
@@ -128,12 +131,12 @@ const styles = StyleSheet.create({
     mainContainer:{
         width:'100%',
         flex:1,
-        paddingLeft:25,
-        paddingRight:25
     },
     upperContainer:{
         width:'100%',
-        height:'60%'
+        height: 150,
+        paddingLeft:25,
+        paddingRight:25
     },
     underContainer:{
         width:'100%',
@@ -180,11 +183,13 @@ const styles = StyleSheet.create({
         alignSelf:'flex-end',
         backgroundColor:'#E2DFDF',
         borderBottomRightRadius:11,
-        borderTopRightRadius:11
+        borderTopRightRadius:11,
+        alignItems:'center',
+        justifyContent:'center'
     },
     selectButtonImage:{
-        width:'100%',
-        height:'100%',
+        width:'50%',
+        height:'50%',
         resizeMode:'contain'    
     },
     //103 + 30 + 60 + 42
@@ -192,7 +197,7 @@ const styles = StyleSheet.create({
         alignSelf:'center',
         width:'100%',
         position:'absolute',
-        top:235,
+        top: deviceCheck.getTopPadding() + 235,
         paddingLeft:25,
         paddingRight:25
     },
@@ -205,6 +210,25 @@ const styles = StyleSheet.create({
         borderRadius:12,
         paddingLeft:12,
         paddingRight:12
+    },
+
+    
+    addButtonContainer:{
+        height:40,
+        width:'100%',
+        alignItems:'flex-end',
+        backgroundColor:'#fff'
+    },
+    addButton:{
+        width:60,
+        marginRight:20,
+        height:'100%',
+        justifyContent:'center',
+    },
+    addButtonText:{
+        color:'blue',
+        textAlign:'center'
     }
+
 })
 

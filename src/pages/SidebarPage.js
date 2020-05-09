@@ -157,12 +157,12 @@ const styles=StyleSheet.create({
         borderTopRightRadius:10,
         borderBottomRightRadius:10,
         borderColor:'#aaa',
-        flex: 7,
+        flex: 3,
         backgroundColor: '#fff',
         opacity:1
     },
     blank:{
-        flex: 3
+        flex: 1
     }
     
 })

@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard, Image } from 'react-native'
 
 import SimpleHeader from '../components/SimpleHeader'
+import networkHandler from '../networkHandler'
 import {account} from '../networkHandler'
 
 export default class FindIDContainer extends Component {
@@ -13,13 +14,61 @@ export default class FindIDContainer extends Component {
             email: '',
             ifCorrect: false,
             foundID:'',
-            notice:''
+            notice:'',
+            countryCode:'82',
+            countryCodeList:[],
+            isLoaded:false
         }
+    }
+    componentDidMount(){
+        this.getCountryCode()
+    }
+    async getCountryCode(){
+        const result = await networkHandler.info.getCountryCode()
+        if(!result.success || !result.list)
+            return;
+        this.setState((state)=>({
+            ...state,
+            isLoaded:true,
+            countryCodeList:result.list
+        }))    
     }
     handleChange = (field, text) => {
         this.setState({
             [field]: text
         });
+    }
+    getPickerItem = (_code, name, isIOS) =>{
+        if(!_code || !name) return null
+        else if(isIOS)
+            return ( <Picker.Item key={_code} label={'+ '+_code} value={_code} /> )
+        return ( <Picker.Item key={_code} label={name} value={_code} /> )
+    }
+    getPicker = ()=>{
+        const pickerItems = !this.state.countryCodeList ? null :
+            this.state.countryCodeList.map(item =>
+                this.getPickerItem(item.code, item.name, deviceCheck.ifIOS)
+            )
+
+        if(deviceCheck.ifIOS){
+            return(
+                <View style={[styles.pickerContainer, {display:this.state.isPickerOpen?'flex':'none'}]}>
+                    <Picker style={{width:'100%', height:'100%'}}
+                        itemStyle={{fontSize: 13, color:'#121111'}}
+                        selectedValue={this.state.countryCode}
+                        onValueChange={text=>this.handleChange('countryCode',text)} >
+                            {pickerItems}
+                    </Picker>
+                </View>
+            )
+        }
+        return(
+            <Picker style={styles.androidPickerContainer}
+                selectedValue={this.state.countryCode}
+                onValueChange={text=>this.handleChange('countryCode',text)} >
+                    {pickerItems}
+            </Picker>        
+        )
     }
     getNotice = ()=>{
         if(this.state.ifCorrect)
@@ -54,13 +103,14 @@ export default class FindIDContainer extends Component {
     render(){
         const {navigator} = this.props
         const {handleChange, getID} = this
+        const {mobileNotice} = this.state
         return(
             <View style={styles.container}>
 
                 <SimpleHeader 
-                    title="Forgot ID"
+                    title="아이디 찾기"
                     handler={()=>{navigator.pop('FindIDPage')}}
-                    notice={this.state.notice}/>
+                    notice={this.state.notice} />
 
                 <View style={styles.mainContainer}>
                     <View style={styles.informationContainer}>
@@ -79,16 +129,65 @@ export default class FindIDContainer extends Component {
                                 onChangeText={text=>handleChange('firstName',text)}
                             />
                         </View>
+                        <View style={{flexDirection:'row',width:'100%'}} >
+                            <TouchableOpacity style={styles.countryCodeBox}
+                                onPress={()=>handleChange('isPickerOpen',!this.state.isPickerOpen)}>
+                                <View style={styles.countryCodeTextContainer}>
+                                    <Text style={styles.countryCodeText} >
+                                        {'+ '+this.state.countryCode}
+                                    </Text>
+                                </View>
+                                <View style={styles.countryCodeButton}>
+                                    <Image
+                                        style={styles.countryCodeButtonImage}
+                                        source={require('../icon/countryCode.png')}
+                                    />
 
+                                </View>
+                            </TouchableOpacity>
+                            <View style={styles.phoneinputBox}>
+                                <TextInput style={{flex:1}}
+                                    keyboardType="number-pad"
+                                    placeholder="휴대전화"
+                                    placeholderTextColor='#888'
+                                    onChangeText={text=>handleChange('phone',text)}
+                                    onFocus={()=>{this.needUp=true}}
+                                />
+                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                    onPress={this.sendMessage}>
+                                    <Text style={{fontSize:13, color:'#121111'}}>인증받기</Text>
+                                </TouchableOpacity>
 
-                        <View style={styles.inputBoxContainer}>
-                            <TextInput style={styles.inputBox}
-                                placeholder="가입시 이메일 주소"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('email',text)}
-                            />
+                            </View>
                         </View>
+
+                        <View style={styles.simplePadding}/>
+                        <View style={styles.inputBoxContainer} >
+                            <View style={styles.inputBox}>
+
+                                <TextInput style={{flex:1}}
+                                    placeholder="인증번호"
+                                    keyboardType="number-pad"
+                                    placeholderTextColor='#888'
+                                    onChangeText={text=>handleChange('phoneCheck',text)}
+                                    onFocus={()=>{this.needUp=true}}
+                                />
+
+                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                    onPress={this.keyCheck}>
+                                    <Text style={{fontSize:13, color:'#121111'}}>인증확인</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <View style={styles.textPadding}>
+                            <Text style={styles.okText}>
+                                {mobileNotice}
+                            </Text>
+                        </View>
+
                     </View>
+                    
                     <View style={styles.enterContainer}>
                         <TouchableOpacity style={styles.enterBox}
                             onPress={getID} >
@@ -203,6 +302,34 @@ const styles = StyleSheet.create({
     },
 
 
+    inputBoxContainer:{
+        width:'100%',
+        flexDirection:'row',
+        borderRadius:15,
+        borderWidth:1,
+        borderColor:'#ddd'
+    },
+    inputBox:{
+        width: '100%',
+        height: 42,
+        paddingLeft:20,
+        flexDirection:'row'
+    },
+    simplePadding:{
+        width:'100%',
+        height:15
+    },
+    textPadding:{
+        width:'100%',
+        height:26,
+        marginLeft:12,
+        justifyContent:'center'
+    },
+    okText:{
+        fontSize:12,
+        color:'#96e255'
+    },
+
     linkContainer:{
         paddingTop:76,
         paddingLeft:45
@@ -219,6 +346,39 @@ const styles = StyleSheet.create({
     },
     findPasswordText:{
         fontSize: 14,
-        color:'#FF6E43'
+        color:'#70e255'
+    }
+})
+
+
+const pickerStyle = StyleSheet.create({
+    container:{
+        width:50,
+        height:250,
+        borderColor:'#000',
+        borderWidth:1,
+        borderRadius:10,
+        alignSelf:'center'
+    },
+    headerContainer:{
+        width:'100%',
+        flex:1,
+        backgroundColor:'#ddd',
+        justifyContent:'center',
+        alignItems:'flex-end'
+    },
+    doneButton:{
+        width:60,
+        height:'80%',
+        backgroundColor:'#aaa',
+        marginRight:20,
+        justifyContent:'center',
+        borderColor:'#121212',
+        borderWidth:1,
+        borderRadius:10
+    },
+    doneText:{
+        textAlign:'center',
+        fontSize:14
     }
 })

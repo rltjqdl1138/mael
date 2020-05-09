@@ -3,27 +3,20 @@ import {View, StyleSheet, TouchableOpacity, Image, Text, Animated} from 'react-n
 import deviceCheck from '../deviceCheck'
 
 export default class SimpleHeader extends Component {
-    handleClose = () =>{
+    componentDidUpdate(){
         Animated.timing(this.noticeY, {
-            toValue: -43,
+            toValue: this.props.notice==='' ? -43 : 0,
             duration: 200
         }).start()
     }
-    handleOpen = () =>{
-        Animated.timing(this.noticeY, {
-            toValue: 0,
-            duration: 200
-        }).start()
-    }
-    noticeY = new Animated.Value(-43);
-    getNoticeStyle = () => [styles.noticeStyle, {transform:[{translateY:this.noticeY}] }]
     
+    getNoticeStyle(){ return [styles.noticeStyle, {transform:[{translateY:this.noticeY}] }]}
+    noticeY = new Animated.Value(-43);
+
     render(){
         const {title, handler, notice, handleComplete, disableNotice} = this.props
         const WholeSize = deviceCheck.getTopPadding() + (disableNotice?60:103)
 
-        if(notice === '') this.handleClose()
-            else this.handleOpen()
         return (
             <View style={[styles.container,{height:WholeSize}]}>
                     
@@ -46,11 +39,20 @@ export default class SimpleHeader extends Component {
                             </Text>
                         </View>
                         <TouchableOpacity style={[styles.completeButton, {display:handleComplete?'flex':'none'}]}
+                            disabled={!handleComplete}
                             onPress={()=>{
-                                    if(handleComplete) handleComplete()
-                                    handler()
+                                    switch( typeof handleComplete ){
+                                        case 'function':
+                                            return handleComplete()
+                                        case 'object':
+                                            return handleComplete.handler? handleComplete.handler():null
+                                        default:
+                                            return null
+                                    }
                                 }}>
-                            <Text style={{fontSize:16}}>완료</Text>
+                            <Text style={{fontSize:18, color:'#0562bf'}}>
+                                { handleComplete && handleComplete.title ? handleComplete.title : '완료' }
+                            </Text>
                         </TouchableOpacity>
                     </View>
                     
@@ -76,25 +78,25 @@ const styles=StyleSheet.create({
         justifyContent:'center',
         backgroundColor:'#fff',
         flexDirection:'row',
-        borderBottomColor:'#121111',
+        borderBottomColor:'#767171',
         borderBottomWidth:0.3,
     },
     noticeStyle:{
         position:'absolute',
         height:43,
         width:'100%',
-        backgroundColor:'#f99',
+        backgroundColor:'#2f2d2d',
         justifyContent:'center',
     },
     noticeText:{
         fontSize:14,
         textAlign:'center',
-        color:'#fff'
+        color:'#70e255'
     },
 
     backButtonContainer:{
         height:'100%',
-        width:100,
+        width:80,
         justifyContent:'center'
     },
     backButtonImage:{
@@ -106,17 +108,18 @@ const styles=StyleSheet.create({
     titleContainer:{
         height: '100%',
         flex:1,
-        paddingRight:100,
+        paddingRight:80,
         justifyContent:'center',
     },
     title:{
-        fontSize: 20,
+        fontSize: 19,
         textAlign:'center',
-        color:'#121111'
+        color:'#121111',
+        fontWeight:'300'
     },
     completeButton:{
         position:'absolute',
-        width:50,
+        width:60,
         height:'100%',
         justifyContent:'center',
         right:0,

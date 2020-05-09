@@ -38,11 +38,11 @@ const MiniPlayingbar = (props)=>{
             <View style={[styles.mainContainer, {opacity:isLoaded?1:0.5}]}>
 
                 <View style={styles.leftPadding}/>
-                <View style={[styles.albumContainer,{height:minibarSize, width:minibarSize}]}>
-                    <Image style={styles.circle} 
+                <View style={[styles.albumContainer,{height:minibarSize-10, width:minibarSize-10, backgroundColor:'green'}]}>
+                    {/*<Image style={styles.circle} 
                         source={require('../image/circle2.jpg')}  />
                     <Image style={styles.albumImage}
-                        source={require('../image/owl2.jpg')}  />
+    source={require('../image/owl2.jpg')}  />*/}
                 </View>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>
@@ -55,15 +55,6 @@ const MiniPlayingbar = (props)=>{
                 <View style={styles.buttonContainer}>
                     <View style={styles.controllerContainer}>
                         <View style={styles.leftPadding}/>
-                        <TouchableOpacity style={styles.buttonItem}
-                            onPress={()=>{
-                                //handleNext({index})
-                                handleNext({index:index+1})
-                                //AudioActions.next({infoNumber:1, index})
-                            }}>
-                                <Image style={styles.buttonItemImage}
-                                    source={require('../icon/previous.png')} />
-                        </TouchableOpacity>
                         
                         {getButton(props)}
 
@@ -71,6 +62,15 @@ const MiniPlayingbar = (props)=>{
                             onPress={()=>{handleNext({})}}>
                             <Image style={styles.buttonItemImage}
                                     source={require('../icon/next.png')} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonItem}
+                            onPress={()=>{
+                                //handleNext({index})
+                                handleNext({index:index+1})
+                                //AudioActions.next({infoNumber:1, index})
+                            }}>
+                                <Image style={styles.addItemImage}
+                                    source={require('../icon/add.png')} />
                         </TouchableOpacity>
                         <View style={styles.rightPadding}/>
                     </View>
@@ -97,8 +97,6 @@ const styles= StyleSheet.create({
         width:'100%',
         flexDirection:'row',
         backgroundColor:'#ddd',
-        justifyContent:'center',
-        alignContent:'center',
 
         backgroundColor:'#F2EFEF',
     },
@@ -111,7 +109,7 @@ const styles= StyleSheet.create({
     rightPadding:{
         right:0,
         height:'100%',
-        width:'6%',
+        width:10
     },
 
 
@@ -136,31 +134,31 @@ const styles= StyleSheet.create({
 
     titleContainer:{
         flex:1,
-        justifyContent:'center'
+        justifyContent:'center',
+        paddingLeft:20
     },
     title:{
-        textAlign:'center',
-        fontSize:12,
+        fontSize:15,
         fontWeight:'bold',
         color:'#121111'
     },
     albumTitle:{
-        textAlign:'center',
-        fontSize:9,
+        fontSize:10,
         color:'#767171'
     },
 
     buttonContainer:{
-        flex:1,
+        width:140,
+        height:'100%',
         flexDirection:'column',
         height:'80%',
-        alignSelf:'center',
+        alignSelf:'center'
     },
     controllerContainer:{
-        flex:2,
+        flex:1,
         flexDirection:'row',
         justifyContent:'center',
-        alignItems:'center'
+        alignItems:'center',
     },
     
     buttonTestItem:{
@@ -175,10 +173,16 @@ const styles= StyleSheet.create({
         flex:1,
         height:'100%',
         alignItems:'center',
-        justifyContent:'center'
+        justifyContent:'center',
+        paddingRight:10,
     },
     buttonItemImage:{
-        width:'70%',
+        width:'100%',
+        height:'70%',
+        resizeMode:'contain'
+    },
+    addItemImage:{
+        width:'40%',
         height:'70%',
         resizeMode:'contain'
     },

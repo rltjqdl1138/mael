@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Image, Keyboard} from 'react-native'
 
-export default class CreditInfo extends Component {
+exports.PaymentInput = class PaymentInput extends Component {
     constructor(props){
         super(props)
         this.state = {height:350}
@@ -25,11 +25,27 @@ export default class CreditInfo extends Component {
 	}
 
     getTitle(type){
+        const isRegistered = this.props.card.isRegistered
         switch(type){
             case 0:
-                return (
-                    <View style={infoStyle.titleContainer}>
+                return isRegistered ? (
+                    <View style={[infoStyle.titleContainer, {flexDirection:'row'}]}>
                         <Text style={infoStyle.titleText}>결제 정보</Text>
+                        <TouchableOpacity style={{width:120, justifyContent:'center'}}
+                            onPress={this.props.handleClear}>
+                            <Text style={{color:'blue', textAlign:'right'}}>직접 입력하기</Text>
+                        </TouchableOpacity>
+                    </View>) :
+                    (<View style={[infoStyle.titleContainer, {flexDirection:'row'}]}>
+                        <Text style={infoStyle.titleText}>결제 정보</Text>
+                        <TouchableOpacity style={{width:120, justifyContent:'center'}}
+                            onPress={()=>{
+                                this.props.navigator.push('PaymentPage',
+                                    {handler:this.props.getPayment?this.props.getPayment:null,
+                                    handleSelect:this.props.handleSelect?this.props.handleSelect:null})
+                            }}>
+                            <Text style={{color:'blue', textAlign:'right'}}>이전 정보 가져오기</Text>
+                        </TouchableOpacity>
                     </View>
                 )
             case 1:
@@ -84,7 +100,7 @@ export default class CreditInfo extends Component {
                     <View style={infoStyle.subTitleContainer}>
                         <Text style={infoStyle.subTitleText}>Card Number</Text>
                     </View>
-                    <View style={infoStyle.inputContainer}>
+                    <View style={[infoStyle.inputContainer, {opacity:card.isRegistered?0.6:1}]}>
                         <View style={infoStyle.cardNumberMask} >
                             <Text style={infoStyle.cardNumberMaskText}>{card.num.slice(0,4)}</Text>
                             <Text style={infoStyle.cardNumberMaskPadding}>-</Text>
@@ -101,6 +117,7 @@ export default class CreditInfo extends Component {
                             maxLength={16}
                             caretHidden={true}
                             clearTextOnFocus={true}
+                            editable={!card.isRegistered}
                             onFocus={()=>{
                                 handleChange('card',{...card, num:''})
                             }}/>
@@ -112,7 +129,7 @@ export default class CreditInfo extends Component {
                         <View style={infoStyle.subTitleContainer}>
                             <Text style={infoStyle.subTitleText}>유효기간</Text>
                         </View>
-                        <View style={infoStyle.inputContainer}>
+                        <View style={[infoStyle.inputContainer, {opacity:card.isRegistered?0.6:1}]}>
 
                             <View style={infoStyle.cardNumberMask} >
                                 <Text style={infoStyle.cardNumberMaskText}>
@@ -129,9 +146,9 @@ export default class CreditInfo extends Component {
                                 maxLength={4}
                                 caretHidden={true}
                                 clearTextOnFocus={true}
+                                editable={!card.isRegistered}
                                 onFocus={()=>{
                                     handleChange('card',{...card, expire:''})
-                                    handleChange('')
                                 }}/>
                             
 
@@ -142,12 +159,13 @@ export default class CreditInfo extends Component {
                         <View style={infoStyle.subTitleContainer}>
                             <Text style={infoStyle.subTitleText}>CVC</Text>
                         </View>
-                        <View style={infoStyle.inputContainer}>
+                        <View style={[infoStyle.inputContainer,{backgroundColor:card.isRegistered?'#DEDDDD':'#fff'}]}>
                             <TextInput style={[infoStyle.inputBox,{textAlign:'center',color:'#121111'}]}
                                 value={card.cvc}
                                 onChangeText={text=>handleChange('card',{...card, cvc:text})}
                                 keyboardType='phone-pad'
                                 maxLength={3}
+                                editable={!card.isRegistered}
                                 clearTextOnFocus={true}
                                 secureTextEntry={true}
                                 onFocus={()=>{handleChange('card',{...card, cvc:''})}}/>
@@ -159,9 +177,9 @@ export default class CreditInfo extends Component {
                         <View style={infoStyle.subTitleContainer}>
                             <Text style={infoStyle.subTitleText}>생년월일</Text>
                         </View>
-                        <View style={infoStyle.inputContainer}>
+                        <View style={[infoStyle.inputContainer,{backgroundColor:card.isRegistered?'#DEDDDD':'#fff'}]}>
 
-                            <View style={infoStyle.cardNumberMask} >
+                            <View style={[infoStyle.cardNumberMask,{display:card.isRegistered?'none':'flex'}]} >
                                 <Text style={infoStyle.cardNumberMaskText}>
                                     {card.birth.length > 0 ? card.birth.slice(0,2) : 'YY'}
                                 </Text>
@@ -178,13 +196,12 @@ export default class CreditInfo extends Component {
                                 onChangeText={text=>handleChange('card',{...card, birth:text})}
                                 keyboardType='phone-pad'
                                 maxLength={6}
+                                editable={!card.isRegistered}
                                 caretHidden={true}
                                 clearTextOnFocus={true}
-                                onFocus={()=>{
+                                onFocus={()=>
                                     handleChange('card',{...card, birth:''})
-                                }}/>
-                            
-
+                                }/>
                         </View>
                     </View>
                     <View style={infoStyle.insidePadding}/>
@@ -192,12 +209,13 @@ export default class CreditInfo extends Component {
                         <View style={infoStyle.subTitleContainer}>
                             <Text style={infoStyle.subTitleText}>비밀번호 앞 두자리</Text>
                         </View>
-                        <View style={infoStyle.inputContainer}>
+                        <View style={[infoStyle.inputContainer,{backgroundColor:card.isRegistered?'#DEDDDD':'#fff'}]}>
                             <TextInput style={[infoStyle.inputBox,{textAlign:'center',color:'#121111'}]}
                                 value={card.password}
                                 onChangeText={text=>handleChange('card',{...card, password:text})}
                                 keyboardType='phone-pad'
                                 maxLength={2}
+                                editable={!card.isRegistered}
                                 clearTextOnFocus={true}
                                 secureTextEntry={true}
                                 onFocus={()=>{handleChange('card',{...card, password:''})}}/>
@@ -205,14 +223,6 @@ export default class CreditInfo extends Component {
                     </View>
                 </View>
                 <Text style={{fontSize:12, color:'#FF6E43'}}>{notice}</Text>
-                <View style={infoStyle.confirmContainer}>
-                    <TouchableOpacity style={infoStyle.confirmButtonContainer}
-                        onPress={()=>{
-                            if( handleConfirm)handleConfirm()  }}>
-                        <Image style={infoStyle.confirmButton}/>
-
-                    </TouchableOpacity>
-                </View>
             </View>
         )
     }
@@ -242,10 +252,13 @@ const infoStyle = StyleSheet.create({
         width:'100%',
         flexDirection:'row',
         alignItems:'center',
+        paddingLeft:25,
+        paddingRight:25
     },
     titleText:{
         fontSize:17,
-        color:'#121111'
+        color:'#121111',
+        flex:1
     },
     titleInfoContainer:{
         flex:1,
@@ -340,4 +353,112 @@ const infoStyle = StyleSheet.create({
         resizeMode:'contain'
     }
 
+})
+
+
+
+exports.PaymentItem = class PaymentItem extends Component{
+    render(){
+        const {cardNumber, expire, signiture, verified, handleSelect, ID} = this.props
+        const _cardNumber = cardNumber.slice(0,4) + cardNumber.slice(5,9) + cardNumber.slice(10,14) + cardNumber.slice(15,19)
+        const _expire = expire.slice(0,2) + expire.slice(3,5)
+        if(!cardNumber || !expire)
+            return null
+        
+        return(
+            <TouchableOpacity style={itemStyle.container}
+                onPress={()=>{handleSelect({cardNumber:_cardNumber, expire:_expire, ID})}}>
+                <View style={itemStyle.verifyImageContainer}>
+                    <Image style={itemStyle.verifyImage}
+                        source={require('../icon/search.png')}
+                    />
+                </View>
+                <View style={itemStyle.cardImageContainer}>
+                    <Image style={itemStyle.cardImage}
+                        source={require('../icon/card.png')}
+                    />
+                </View>
+                <View style={itemStyle.InfoContainer}>
+                    <View style={itemStyle.cardNumberContainer}>
+                        <Text style={itemStyle.cardNumberText}>{cardNumber}</Text>
+                    </View>
+
+                    <View style={itemStyle.cardExpireContainer}>
+                        <Text style={itemStyle.cardExpireText}>{expire}</Text>
+                    </View>
+                </View>
+                <TouchableOpacity style={itemStyle.deleteImageContainer}
+                    disabled={signiture}
+                    onPress={()=>{alert('delet')}}>
+                    {signiture?null:
+                    (<Image style={itemStyle.deleteImage} 
+                        source={require('../icon/delete.png')}
+                    />)}
+                </TouchableOpacity>
+            </TouchableOpacity>
+        )
+    }
+}
+const itemStyle=StyleSheet.create({
+    container:{
+        width:'100%',
+        height:120,
+        borderBottomWidth:0.5,
+        borderBottomColor:'#DEDDDD',
+        borderTopWidth:0.5,
+        borderTopColor:'#DEDDDD',
+        flexDirection:'row',
+        padding:10,
+    },
+    verifyImageContainer:{
+        width:50,
+        height:'100%',
+        justifyContent:'center',
+        alignItems:'center',
+        padding:10
+    },
+    verifyImage:{
+        width:'100%',
+        height:'50%',
+        resizeMode:'contain'
+    },
+    cardImageContainer:{
+        width:60,
+        height:'100%',
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    cardImage:{
+        width:'100%',
+        height:'100%',
+        resizeMode:'contain'
+    },
+    InfoContainer:{
+        flex:1,
+        justifyContent:'center',
+        padding:20,
+        paddingTop:30
+    },
+    cardNumberContainer:{
+        flex:1
+    },
+    cardNumberText:{
+        fontSize:16
+    },
+    cardExpireContainer:{
+        flex:1
+    },
+    cardExpireText:{
+        fontSize:14
+    },
+
+    deleteImageContainer:{
+        width:40,
+        height:'100%'
+    },
+    deleteImage:{
+        width:'100%',
+        height:'100%',
+        resizeMode:'contain'
+    }
 })

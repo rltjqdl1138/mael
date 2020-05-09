@@ -7,31 +7,31 @@ export default class LoginSetting extends Component{
         const {  handleMainPush, handleWholePush, handleClose, handleCloseSetting } = this.props
         return(
             <View style={styles.container}>
-                <View style={styles.topPadding}>
-                    <TouchableOpacity style={styles.backButton}
-                        onPress={handleCloseSetting} >
-                            <Image style={styles.backButtonImage}
-                                source={require('../icon/back.png')}
-                            />
-                    </TouchableOpacity>
-                </View> 
-                <View style={styles.settingContainer}>
 
-                    <TouchableOpacity style={styles.settingItem}
+                <TouchableOpacity style={styles.settingContainer}
+                    onPress={()=>{handleCloseSetting()}}>
+                    <Image
+                        style={styles.settingImage}
+                        source={require('../icon/setting.png')}
+                    />
+                </TouchableOpacity>
+                <View style={styles.mainContainer}>
+
+                    <TouchableOpacity style={styles.mainItem}
                         onPress={()=>{`
                             handleClose()
                             handleWholePush('')` }}>
-                        <Text style={styles.settingItemText}>
-                            서비스 안내
+                        <Text style={styles.mainItemText}>
+                            플랜 안내
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.settingItem}
+                    <TouchableOpacity style={styles.mainItem}
                         onPress={()=>{`
                             handleClose()
                             handleWholePush('')` }}>
-                        <Text style={styles.settingItemText}>
-                            이용 약관
+                        <Text style={styles.mainItemText}>
+                            이용안내 및 약관
                         </Text>
                     </TouchableOpacity>
 
@@ -56,27 +56,37 @@ const styles= StyleSheet.create({
         justifyContent:'center',
     },
 
-    backButton:{
-        marginLeft: 25,
-        width:40,
-        height:40
-    },
-    backButtonImage:{
-        height:'100%',
-        width:'100%',
-        resizeMode:'contain'
-    },
+
     settingContainer:{
+        height:40,
+        margin:0,
+        padding:0,
+        marginTop:4,
+        justifyContent:'flex-end',
+        alignItems:'flex-end'
+    },
+    settingImage:{
+        position:'absolute',
+        right:-5,
+        bottom:0,
+        height:'100%',
+        width:'18%',
+        resizeMode:'contain',
+    },
+
+
+    mainContainer:{
         flex:1,
         backgroundColor:'#fff',
-        paddingTop:80
+        paddingTop:100
     },
-    settingItem:{
-        padding: 20,
-        paddingLeft: 40
+    mainItem:{
+        height:50,
+        paddingLeft: 30
     },
-    settingItemText:{
-        fontSize:15
+    mainItemText:{
+        fontSize:16,
+        color:'gray'
     }
 
 })

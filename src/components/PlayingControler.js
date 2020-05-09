@@ -5,7 +5,7 @@ import { AudioActions } from '../store/actionCreator'
 import PlayingBar from './PlayingBar'
 
 class PlayingControler extends Component{
-    getButton = (props)=>{
+    getButton = (props) => {
         const { title, list } = props
         if(props.isPlaying === 1)
             return (
@@ -13,16 +13,15 @@ class PlayingControler extends Component{
                     onPress={()=>{AudioActions.pause({infoNumber:1})}}>
                         <Image style={styles.buttonItemImage}
                             source={require('../icon/pause.png')} />
-                </TouchableOpacity>
-            )
+                </TouchableOpacity> )
         return (
             <TouchableOpacity style={styles.buttonItem}
                 onPress={()=>{AudioActions.resume({infoNumber:1})}}>
                 <Image style={styles.buttonItemImage}
                     source={require('../icon/play.png')} />
-            </TouchableOpacity>
-        )
+            </TouchableOpacity> )
     }
+
     getOptionText = (op)=>{
         switch(op){
             case 0:
@@ -33,6 +32,7 @@ class PlayingControler extends Component{
                 return '순차재생'
         }
     }
+
     getPlayingBar = (playinfo, isPlaying)=>{
         if(this.isFirst)
             return(
@@ -42,10 +42,10 @@ class PlayingControler extends Component{
                         <Text style={styles.leftTimeText}>0:00</Text>
                         <Text style={styles.rightTimeText}>0:00</Text>
                     </View>
-                </View>
-            )
+                </View> )
         return(<PlayingBar playinfo={playinfo} infoNumber={1} isPlaying={isPlaying} theme='gray'/>)
     }
+
     render(){
         const {newPlayinfo, isPlaying, getTime, index, playOption} = this.props
         const PLAYBACK_LIMIT = 5000
@@ -76,7 +76,6 @@ class PlayingControler extends Component{
 
                     <TouchableOpacity style={styles.buttonItem}
                         onPress={()=>{AudioActions.next({infoNumber:1}) }}>
-                        
                         <Image style={styles.buttonItemImage}
                             source={require('../icon/next.png')} />
                     </TouchableOpacity>
@@ -85,7 +84,6 @@ class PlayingControler extends Component{
                         onPress={()=>{alert(index)}}>
                         <Image source={require('../icon/add.png')}
                             style={styles.buttonItemImage} />
-                        
                     </TouchableOpacity>
                 </View>
                 <View style={styles.optionContainer}>
@@ -95,6 +93,7 @@ class PlayingControler extends Component{
         )
     }
 }
+
 const styles = StyleSheet.create({
     container:{
         width:'100%',
@@ -153,7 +152,6 @@ const styles = StyleSheet.create({
         paddingRight:10
     },
 
-
     optionContainer:{
         height:40,
         width:'100%',
@@ -162,25 +160,9 @@ const styles = StyleSheet.create({
     optionText:{
         textAlign:'center',
         color:'#121111'
-    },
-    test1:{
-        width:200,
-        height:'100%',
-        backgroundColor:'gray'
-    },
-
-    test2:{
-        width:200,
-        height:'100%',
-        backgroundColor:'red'
-    },
-
-    test3:{
-        width:200,
-        height:'100%',
-        backgroundColor:'blue'
     }
 })
+
 export default connect(
     ({audio})  =>({
         isPlaying: audio.isPlaying,

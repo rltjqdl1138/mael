@@ -18,13 +18,22 @@ export default class MusicTitle extends Component {
         })
         return (
             <View style={styles.container}>
-                <View style={styles.textContainer}>
+                <View style={[styles.textContainer,{paddingLeft:15, paddingTop:0, paddingBottom:10}]}>
                     <Text style={styles.text2}>KIDS</Text>
                 </View>
                 <View style={styles.textContainer}>
                     <Text style={styles.text}>MUSIC</Text>
                 </View>
-                {title}
+                <View style={{paddingLeft:20}}>
+                    {title}
+                </View>
+
+                <View style={styles.textContainer}>
+                    <Text style={styles.text}>BOOK</Text>
+                </View>
+                <View style={{paddingLeft:20}}>
+                    {title}
+                </View>
             </View>
         )
         
@@ -47,12 +56,11 @@ class MusicTitleItem extends Component{
 }
 const styles=StyleSheet.create({
     container:{
-        paddingTop:20,
-        paddingLeft:22
+        paddingTop:15,
     },
     textContainer:{
-        paddingTop:10,
-        paddingBottom:20
+        paddingLeft:20,
+        paddingBottom:15,
     },
     text2:{
         fontSize:16,
@@ -60,15 +68,15 @@ const styles=StyleSheet.create({
     },
     text:{
         fontSize:16,
-        fontWeight:'500'
+        fontWeight:'400'
     },
     itemContainer:{
         width:'100%',
-        height:45,
-        marginLeft: 5,
+        height:35,
+        marginLeft: 7,
     },
     itemText:{
-        fontSize:15,
+        fontSize:16,
         color:'gray'
     }
 })

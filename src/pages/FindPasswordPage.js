@@ -44,7 +44,7 @@ export default class FindPasswordContainer extends Component {
             <View style={styles.container}>
 
                 <SimpleHeader 
-                    title="Forgot Password"
+                    title="비밀번호 찾기"
                     handler={()=>{navigator.pop('FindPasswordPage')}}
                     notice={getNotice()}/>
 

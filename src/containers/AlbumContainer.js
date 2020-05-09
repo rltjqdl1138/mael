@@ -83,12 +83,14 @@ class album_Container extends Component {
         return (
             <View style={styles.albumContainer}>
                 <View style={styles.albumArtContainer}>
+                    {/*
                     <Image style={styles.circle}
                         source={require('../image/circle.jpg')}
                     />
                     <Image style={styles.albumArt}
                         source={require('../image/owl2.jpg')}
                     />
+                    */}
                 </View>
                 <View style={styles.titleContainer}>
                         
@@ -98,13 +100,14 @@ class album_Container extends Component {
                     <Text style={styles.artist}>
                         Artist name here
                     </Text>
-                    <TouchableOpacity style={{flex:1}}
+                </View>
+
+                <TouchableOpacity style={{width:18, paddingTop:8, paddingRight:0}}
                         onPress={()=>{this.handleAddPlaylist(this.state.musicPlaylist); alert('리스트에 추가되었습니다') }}
                         >
-                        <Image style={{width:50,height:50,resizeMode:'contain', alignSelf:'flex-end'}}
+                        <Image style={{width:13,height:13,resizeMode:'cover'}}
                             source={require('../icon/add.png')} />
-                    </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
                 
             </View>)
     }
@@ -128,15 +131,14 @@ class album_Container extends Component {
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.shffleButtonContainer}
                             onPress={()=>{
-                                AudioActions.pause()
-                            }}
+                                AudioActions.pause() }}
                             >
                             <Image source={require('../icon/shufflebutton.png')}
                                 style={styles.shffleButton}/>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.paddingContainer}>
-                        <Text style={styles.paddingText}>Song List</Text>
+                        <Text style={styles.paddingText}>Sound List</Text>
                     </View>
                     <MusicPlayList
                         isLogin={isLogin}
@@ -183,7 +185,8 @@ const styles = StyleSheet.create({
         backgroundColor:'#fff',
         alignItems: 'center',
         paddingLeft:20,
-        paddingRight:20
+        paddingRight:20,
+        paddingTop:15
     },
     scroll:{
         width:'100%',
@@ -192,18 +195,17 @@ const styles = StyleSheet.create({
 
     // ALBUM ART
     albumContainer:{
-        height:width*0.5,
+        height:width*0.38,
         backgroundColor:'#fff',
         width:'100%',
         flexDirection:'row'
     },
     albumArtContainer:{
-        width:width*0.5,
-        height:width*0.5,
+        width:width*0.38,
+        height:width*0.38,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingRight:20,
-        paddingTop:20
+        backgroundColor:'green'
     },
     circle:{
         position:'absolute',
@@ -223,19 +225,21 @@ const styles = StyleSheet.create({
     // TITLE
     titleContainer:{
         flex:1,
-        paddingTop:20,
+        paddingTop:4,
         paddingBottom:20,
-        paddingLeft:10
+        paddingLeft:20
     },
     artist:{
         fontSize:13,
-        color:'#767171'
+        color:'#767171',
+        marginTop:2
     },
     title:{
         fontSize:18,
         fontWeight:'600'
     },
     buttonContainer:{
+        marginTop:20,
         height:width/6,
         width:'100%',
         flexDirection:'row',
@@ -243,13 +247,11 @@ const styles = StyleSheet.create({
     },
     playButtonContainer:{
         flex:1,
-        paddingLeft:20,
-        paddingRight:10
+        paddingRight:7
     },
     shffleButtonContainer:{
         flex:1,
-        paddingRight:20,
-        paddingLeft:10
+        paddingLeft:7
     },
     playButton:{
         height:'100%',
@@ -263,8 +265,8 @@ const styles = StyleSheet.create({
 
     },
     paddingContainer:{
-        padding:10,
-        height:40
+        paddingTop:15,
+        height:45,
     },
     paddingText:{
         fontWeight:'normal',

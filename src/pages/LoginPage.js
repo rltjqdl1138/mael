@@ -28,9 +28,11 @@ export default class LoginContainer extends Component {
         return(
             <View style={styles.container}>
                 <SimpleHeader 
-                    title="Sign in"
+                    title="로그인"
                     handler={()=>{navigator.pop('LoginPage')}}
-                    notice={this.state.notice}/>
+                    notice={this.state.notice}
+                    handleComplete={()=>{}}
+                    />
 
                 <View style={[styles.mainContainer,{opacity:this.state.isLoaded?1:0.5}]}>
                     <View style={styles.accountInform}>
@@ -62,10 +64,8 @@ export default class LoginContainer extends Component {
 
 
                     <View style={styles.enterButtonContainer}>
-                        <View style={styles.enterButton}>
                             {/*  TODO:추후 이미지(icon)로 교체  */}
-                            <Button
-                                title="Enter"
+                            <TouchableOpacity style={styles.enterButton}
                                 onPress={async ()=>{
                                     
                                     if(this.state.id.length < 8)
@@ -84,8 +84,12 @@ export default class LoginContainer extends Component {
 
                                         this.setState(state=>({...state, notice:'아이디 혹은 비밀번호가 올바르지 않습니다.', isLoaded:true}))
                                     }
-                                }}/> 
-                        </View>
+                                }}>
+                                <Image
+                                    style={{resizeMode:'contain', flex:1}}
+                                    source={require('../icon/shufflebutton.png')}
+                                />
+                            </TouchableOpacity>
                     </View>
                     <View style={styles.navigatorContainer}>
                         <View style={styles.findContainer}>
@@ -96,7 +100,7 @@ export default class LoginContainer extends Component {
                                 </Text>
                             </TouchableWithoutFeedback>
                             <View style={styles.blankContainer}>
-                                <Text style={styles.findText}>/</Text>
+                                <Text style={[styles.findText,{textAlign:'center',}]}>/</Text>
                             </View>
                             <TouchableWithoutFeedback style={styles.findPasswordContainer}
                                 onPress={()=>{ navigator.push('FindPasswordPage',{}) }} >
@@ -106,12 +110,13 @@ export default class LoginContainer extends Component {
                             </TouchableWithoutFeedback>
                         </View>
                         <View style={styles.signupContainer}>
-                            <View >
-                                <Text style={styles.findText}>
+                            <View 
+                                style={styles.signupTextContainer}>
+                                <Text style={styles.plainText}>
                                     아직 회원이 아니신가요?
                                 </Text>
                             </View>
-                            <TouchableWithoutFeedback 
+                            <TouchableWithoutFeedback style={{flex:1}}
                                 onPress={()=>{ navigator.push('SignupPage',{}) }} >
                                 <Text style={styles.signupText}>
                                     가입하기 >
@@ -153,7 +158,7 @@ const styles=StyleSheet.create({
 
 
     accountInform:{
-        height:'25%',
+        height:110,
         paddingLeft:25,
         paddingRight:25,
         borderColor:'#000',
@@ -198,7 +203,7 @@ const styles=StyleSheet.create({
     },
 
     enterButtonContainer:{
-        marginTop:55,
+        marginTop:60,
         height: 40,
         width:'100%',
         alignItems:'center'
@@ -206,19 +211,22 @@ const styles=StyleSheet.create({
     enterButton:{
         width:80,
         height:40,
-        backgroundColor:'#000'
+        justifyContent:'center',
+        alignItems:'center'
     },
 
     navigatorContainer:{
         marginTop:'20%',
         width:'100%',
-        height:80,
-        paddingLeft:45,
-        paddingRight:45
+        flex:1,
+        paddingLeft:35,
+        paddingRight:45,
+        justifyContent:'flex-end',
+        paddingBottom:100
     },
     findContainer:{
         width:'100%',
-        height:20,
+        height:50,
         flexDirection:'row'
     },
     findIDContainer:{
@@ -226,7 +234,7 @@ const styles=StyleSheet.create({
         height:'100%',
     },
     blankContainer:{
-        width:10,
+        width:20,
         height:'100%',
     },
     findPasswordContainer:{
@@ -234,18 +242,24 @@ const styles=StyleSheet.create({
         height:'100%',
     },
     findText:{
-        fontSize:12,
+        fontSize:16,
         color:'#707070'
     },
-
+    plainText:{
+        fontSize:16,
+        color:'#707070',
+        fontWeight:'bold'
+    },
     signupContainer:{
         width:'100%',
-        height:40,
-        marginTop:26
+        height:50,
+    },
+    signupTextContainer:{
+        height:30
     },
     signupText:{
-        fontSize:12,
-        color:'#FF6E43',
+        fontSize:16,
+        color:'#96e255',
         fontWeight:'bold'
     }
 })

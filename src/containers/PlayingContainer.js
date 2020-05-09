@@ -73,13 +73,13 @@ export default class PlayingContainer extends Component {
     getAlbumArt = (title, artist) =>{
         return (
             <View style={styles.albumContainer}>
-                <View style={styles.albumArtContainer}>
+                <View style={[styles.albumArtContainer,{backgroundColor:'green'}]}>{/*
                     <Image style={styles.circle}
                         source={require('../image/circle.jpg')}
                     />
                     <Image style={styles.albumArt}
                         source={require('../image/owl2.jpg')}
-                    />
+                />*/}
                 </View>
 
                 <View style={styles.titleContainer}>
@@ -112,9 +112,9 @@ export default class PlayingContainer extends Component {
                     <View style={styles.paddingContainer}>
                         <View style={styles.paddingTitleContainer}>
                             <Text style={styles.albumText}>
-                                {(albumInfo.title?albumInfo.title:'none' )+ ' >'}
+                                { albumInfo.title?albumInfo.title + ' >' : 'none' }
                             </Text>
-                            <Text style={styles.paddingText}>Song List</Text>
+                            <Text style={styles.paddingText}>Sound List</Text>
                         </View>
                         <View style={styles.optionContainer}>
                             <TouchableOpacity style={[styles.optionButtonContainer, {backgroundColor:playOption.option===0?'red':'#fff'}]}
@@ -184,8 +184,9 @@ const styles = StyleSheet.create({
     container:{
         width:'100%',
         flex:1,
-        backgroundColor:'#fafafa',
+        //backgroundColor:'#fafafa',
         alignItems: 'center',
+        paddingTop: deviceCheck.ifTopbarless? 20:0,
         paddingLeft:20,
         paddingRight:20
     },
@@ -200,9 +201,11 @@ const styles = StyleSheet.create({
 
     // ALBUM ART
     albumContainer:{
-        height:width*0.3,
+        height:width*0.35,
         width:'100%',
-        flexDirection:'row'
+        flexDirection:'row',
+        borderBottomWidth:0.3,
+        borderBottomColor:'#555'
     },
     albumArtContainer:{
         width:width*0.3,
@@ -226,24 +229,27 @@ const styles = StyleSheet.create({
     },
 
     // TITLE
+
     titleContainer:{
         flex:1,
-        paddingTop:20,
+        paddingTop:4,
         paddingBottom:20,
         paddingLeft:20
     },
     artist:{
         fontSize:13,
-        color:'#767171'
+        color:'#767171',
+        marginTop:2
     },
     title:{
         fontSize:18,
-        fontWeight:'700'
+        fontWeight:'600'
     },
 
     paddingContainer:{
         width:'100%',
-        height:60,
+        height:63,
+        paddingBottom:3,
         flexDirection:'row',
     },
     paddingTitleContainer:{
@@ -252,11 +258,13 @@ const styles = StyleSheet.create({
     },
     albumText:{
         color:'#121111',
-        fontSize:13
+        fontSize:16,
+        fontWeight:'600'
     },
     paddingText:{
+        marginTop:2,
         color:'#121111',
-        fontSize:13
+        fontSize:15
     },
     optionContainer:{
         flex:2,

@@ -247,6 +247,7 @@ const itemStyle = StyleSheet.create({
         flexDirection:'row',
         flex:1,
     },
+
     indexContainer:{
         height:'100%',
         width:30,
@@ -256,11 +257,12 @@ const itemStyle = StyleSheet.create({
     indexText:{
         color:'#121111',
         fontSize:15,
+        color:'#767171',
         textAlign:'center'
     },
     indexImage:{
-        width:'100%',
-        height:'100%',
+        width:'50%',
+        height:'50%',
         resizeMode:'contain'
     },
     titleContainer:{
@@ -278,10 +280,11 @@ const itemStyle = StyleSheet.create({
         color:'#121111',
         fontWeight:'900'
     },
+
     openButtonContainer:{
-        height:'100%',
-        width:50,
-        
+        height:20,
+        width:20,
+        alignSelf:'center'
     },
     openButton:{
         width:'100%',
@@ -309,8 +312,8 @@ const itemStyle = StyleSheet.create({
     topPadding:{
         width:'100%',
         height:0,
-        borderBottomColor:'#EAE8E8',
-        borderBottomWidth:1
+        //borderBottomColor:'#EAE8E8',
+        //borderBottomWidth:1
     },
     bottomPadding:{
         width:'100%',

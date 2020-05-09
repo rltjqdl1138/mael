@@ -53,7 +53,8 @@ class Navigator extends Component {
 
     //BackHandler.addEventListener("hardwareBackPress", ()=>{this.handlePop(sceneName); return true})
         if(ind === -1){
-            this.state.sceneConfig[sceneName].config = config
+            if(config)
+                this.state.sceneConfig[sceneName].config = config
             this.setState(state => ({
                 ...state,
                 stack: [...state.stack, state.sceneConfig[sceneName]], 
@@ -75,43 +76,53 @@ class Navigator extends Component {
             )
         }
     }
-
+    handleReplace = (oldSceneName, newSceneName) =>{
+        const isThere = (element) => element['key'] === oldSceneName
+        const { width } = Dimensions.get('window')
+        const { stack } = this.state
+        const ind = stack.findIndex(isThere)
+        if(!oldSceneName || oldSceneName==='' || ind === -1)
+            return;
+    }
     handlePop = (sceneName) =>{
         const isThere = (element) => element['key'] === sceneName
         const { width } = Dimensions.get('window')
         const { stack } = this.state
+        const lastItem = stack[stack.length-1]
         const ind = stack.findIndex(isThere)
+        if(stack.length === 1)
+            return;
+        switch(ind){
+            case stack.length-1:
+                break;
+            case -1:
+            case 0:
+                this.setState(state=>({ ...state,
+                    stack: [stack[0], lastItem]
+                }))
+                break;
+            default:
+                this.setState(state=>({ ...state,
+                    stack: [...stack.slice(0,ind), lastItem]
+                }))
+        }
+
         Animated.timing(this._animatedValue,{
             toValue: width,
             duration: 300,
             useNativeDriver: true
         }).start(()=>{
             this._animatedValue.setValue(0)
-            this.setState(state =>{
-                if(!sceneName || sceneName==="" || ind===-1){
-                    //BackHandler.addEventListener("hardwareBackPress", ()=>{return false})
-                    return {
-                        ...state,
-                        stack: stack.slice(0, 1)
-                    }
-                }
-                else if(stack.length > ind){
-                    //BackHandler.addEventListener("hardwareBackPress", ()=>{
-                    //    this.handlePop(stack[ind-1].key)
-                    //    return false})
-                    return {
-                        ...state,
-                        stack: stack.slice(0, ind)
-                    }
-                }
-                return state
-            })
+            this.setState(state =>({
+                ...state,
+                stack:state.stack.slice(0,state.stack.length-1)
+            }))
         })
-        if(ind === -1){
-            return stack.slice(1,stack.length)
-        }
+        //if(ind === -1){
+        //    return stack.slice(1,stack.length)
+        //}
 
-        return stack.slice(ind, stack.length)
+        //return stack.slice(ind, stack.length)
     }
     render(){
         return (

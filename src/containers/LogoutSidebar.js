@@ -29,19 +29,6 @@ export default class LoginSidebar extends Component{
                         }}>
                         <Text style={{fontSize:15}}>로그인</Text>
                     </TouchableHighlight>
-                    <View style={styles.signPadding}>
-                        <Text style={{fontSize:15}}>
-                            /
-                        </Text>
-                    </View>
-                    <TouchableHighlight
-                        style={styles.loginContainer}
-                        onPress={()=>{
-                            handleClose()
-                            handleWholePush('SignupPage')
-                        }}>
-                        <Text style={{fontSize:15}}>회원가입</Text>
-                    </TouchableHighlight>
 
                 </View>
 
@@ -122,7 +109,7 @@ const styles= StyleSheet.create({
     },
     settingImage:{
         position:'absolute',
-        right:0,
+        right:-5,
         bottom:0,
         height:'100%',
         width:'18%',

@@ -2,37 +2,42 @@ import React, {Component} from 'react'
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Image } from 'react-native'
 
 import SimpleHeader from '../components/SimpleHeader'
+import networkHandler from '../networkHandler'
 
 
 export default class ChangeEmailPage extends Component {
     constructor(props){
         super(props)
-        if(props.config && props.config.email)
-            this.state = {email:props.config.email}
+        if(props.config && props.config.value)
+            this.state = {email: props.config.value, notice:''}
         else
-            this.state = {email:''}
+            this.state = {email:'a', notice:''}
     }
     handleChange = (field, text) => {
         this.setState({
             [field]: text
         });
     }
-    handleComplete = () =>{
-        const handler = this.props.config && this.props.config.handler ? this.props.config.handler : ()=>{}
-        handler(this.state.email)
+    handleComplete = async () =>{
+        const {email} = this.state
+        const response = await networkHandler.account.changeEmail({email},this.props.token)
+        console.warn(response)
+        if(!response.success)
+            return this.handleChange('notice','이메일 변경에 실패했습니다.')
+        this.props.config && this.props.config.handler ? this.props.config.handler() : null
+        return this.props.navigator.pop('ChangeEmailPage')
     }
     render(){
         const {navigator} = this.props
         const {handleChange, handleComplete} = this
-        const {email} = this.state
-        
+        const {email, notice} = this.state
         return(
             <View style={styles.container}>
 
                 <SimpleHeader 
                     title="이메일 변경"
                     handler={()=>{navigator.pop('ChangeEmailPage')}}
-                    notice=''
+                    notice={notice}
                     handleComplete={handleComplete}/>
 
                 <ScrollView

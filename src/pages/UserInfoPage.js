@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity }from 'react-native'
 
 
 import SimpleHeader from '../components/SimpleHeader'
+import networkHandler from '../networkHandler'
 
 export default class UserInformationPage extends Component{
     constructor(props){
@@ -15,94 +16,73 @@ export default class UserInformationPage extends Component{
         }
     }
     componentDidMount(){
-        fetch('http://192.168.0.23:3000/api/account/user',{
-                headers:{
-                    'x-access-token':this.props.token,
-                    'Content-Type': 'application/json' 
-                }
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                if(!data.success)
-                    throw Error('error')
-                this.setState(state=>({
-                    ...state,
-                    name: data.name,
-                    email: data.email,
-                    phone: data.mobile,
-                    isLoaded: true
-                }))
-            })
-            .catch((error) => {
-
-            });
-
+        this.getUserinfo()
     }
-    getNotice = ()=>{
-        return ''
+    getUserinfo = async ()=>{
+        const response = await networkHandler.account.getUserinfo(this.props.token)
+        
+        return !response.success ? this.props.navigator.pop('UserInfoPage') :
+            this.setState({
+                name: response.name,
+                email: response.email,
+                phone: response.mobile,
+                isLoaded:true
+            })
     }
+
     render(){
         const {navigator} = this.props
         const {name, email, phone, isLoaded} = this.state
+        const _infoList = [
+            {key:'성명', value:name, nextPage:null},
+            {key:'이메일', value:email, nextPage:'ChangeEmailPage'},
+            {key:'전화번호', value:phone, nextPage:'ChangePhonePage'}
+        ]
+
+        const infoList = _infoList.map((item,index) =>
+            ( <InfoItem key={String(index)} payload={item} navigator={navigator} isLoaded={isLoaded} /> ))
+
         return(   
             <View style={styles.container}>
                 <SimpleHeader 
                     title="개인 정보"
                     handler={()=>{navigator.pop('UserInfoPage')}}
-                    notice={this.getNotice()}/>
+                    notice={''}/>
 
                 <View style={[styles.mainContainer,{opacity:isLoaded?1:0.5}]}>
-                    <View style={styles.informContainer}>
-                        <View style={styles.informTypeContainer}>
-                            <Text style={styles.informTypeText}>
-                                성명
-                            </Text>
-                        </View>
-                        <View style={styles.informValueContainer}>
-                            <Text style={styles.informValueText}>
-                                {name}
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.informContainer}>
-                        <View style={styles.informTypeContainer}>
-                            <Text style={styles.informTypeText}>
-                                이메일
-                            </Text>
-                        </View>
-                        <View style={styles.informValueContainer}>
-                            <TouchableOpacity style={{flex:1, justifyContent:'center'}}
-                                onPress={()=>{this.props.navigator.push('ChangeEmailPage',
-                                    {email,handler:(email)=>
-                                        this.setState((state)=>({...state, email}))})}}>
-                                <Text style={styles.informValueText}>{email}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <View style={styles.informContainer}>
-                        <View style={styles.informTypeContainer}>
-                            <Text style={styles.informTypeText}>
-                                전화번호
-                            </Text>
-                        </View>
-                        <View style={styles.informValueContainer}>
-
-                        <TouchableOpacity style={{flex:1, justifyContent:'center'}}
-                                    onPress={()=>{this.props.navigator.push('ChangePhonePage',
-                                        {phone,handler:(phone)=>
-                                            this.setState((state)=>({...state, phone}))})}}>
-                                    <Text style={styles.informValueText}>{phone}</Text>
-                                </TouchableOpacity>
-                            
-                        </View>
-                    </View>
+                    {infoList}
                 </View>
             </View>
         )
     }
 }
+
+class InfoItem extends Component{
+    render(){
+        const {payload, navigator, isLoaded} = this.props
+        const {key, value, nextPage} = payload
+        return (
+            <View style={styles.informContainer}>
+
+                <View style={styles.informTypeContainer}>
+                    <Text style={styles.informTypeText}>
+                        {key}
+                    </Text>
+                </View>
+
+                <TouchableOpacity style={styles.informValueContainer}
+                    disabled={!nextPage || !isLoaded}
+                    onPress={()=>{navigator.push(
+                        nextPage, {value, handler:()=>this.getUserinfo()})}}>
+                    <Text style={styles.informValueText}>{value}</Text>
+                </TouchableOpacity>
+                         
+            </View>
+        )
+    }
+}
+    
+
 const styles = StyleSheet.create({
     container:{
         width:'100%',

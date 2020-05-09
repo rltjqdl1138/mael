@@ -71,9 +71,6 @@ const MusicItem = (props)=>{
     return(
         <View style={[itemStyle.container,{height:(74+lyricHeight)}]}>
 
-            <View style={itemStyle.topPaddingContainer}>
-                <View style={itemStyle.topPadding} />
-            </View>
             <TouchableOpacity style={itemStyle.mainContainer}
                 onPress={()=>{
                     if(!isLoaded&&isPlaying)
@@ -86,14 +83,16 @@ const MusicItem = (props)=>{
                         return handleResume()}
                     else{
                         return handlePause()}
-                }}
-                >
+                }}>
                 <View style={itemStyle.indexContainer}>
                     {PlayButton(index, isCurrent)}
                 </View>
                 <View style={itemStyle.titleContainer}>
                     <Text style={isCurrent?itemStyle.chooseTitle:itemStyle.title}>
                         {title}
+                    </Text>
+                    <Text style={itemStyle.artist}>
+                        Artist name
                     </Text>
                 </View>
                 <View style={itemStyle.openButtonContainer}>
@@ -118,6 +117,7 @@ const MusicItem = (props)=>{
         </View>
     )
 }
+
 const itemStyle = StyleSheet.create({
     container:{
         width:'100%',
@@ -138,11 +138,12 @@ const itemStyle = StyleSheet.create({
     indexText:{
         color:'#121111',
         fontSize:15,
+        color:'#767171',
         textAlign:'center'
     },
     indexImage:{
-        width:'100%',
-        height:'100%',
+        width:'50%',
+        height:'50%',
         resizeMode:'contain'
     },
     titleContainer:{
@@ -152,18 +153,23 @@ const itemStyle = StyleSheet.create({
         justifyContent:'center'
     },
     title:{
-        fontSize:15,
+        fontSize:16,
         color:'#121111'
     },
+    artist:{
+        fontSize:14,
+        color:'#767171',
+        marginTop:1
+    },
     chooseTitle:{
-        fontSize:15,
+        fontSize:16,
         color:'#121111',
         fontWeight:'900'
     },
     openButtonContainer:{
-        height:'100%',
-        width:50,
-        
+        height:20,
+        width:20,
+        alignSelf:'center'
     },
     openButton:{
         width:'100%',
@@ -192,12 +198,12 @@ const itemStyle = StyleSheet.create({
         width:'100%',
         height:0,
         borderBottomColor:'#EAE8E8',
-        borderBottomWidth:1
+        borderBottomWidth:0.8
     },
     bottomPadding:{
         width:'100%',
         height:1,
-        //borderBottomColor:'#EAE8E8',
-        //borderBottomWidth:3
+        borderBottomColor:'#EAE8E8',
+        borderBottomWidth:0.8
     }
 })

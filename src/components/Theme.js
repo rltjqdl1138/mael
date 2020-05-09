@@ -16,8 +16,16 @@ class ThemeItem extends Component{
                 </View>
 
                 <View style={itemStyle.titleContainer}>
-                    <Text style={itemStyle.title}>
+                    <Text style={itemStyle.title}
+                        numberOfLines={1}>
                         {this.props.title}
+                    </Text>
+                </View>
+
+                <View style={itemStyle.subtitleContainer}>
+                    <Text style={itemStyle.subtitle}
+                        numberOfLines={1}>
+                        artist name
                     </Text>
                 </View>
 
@@ -26,34 +34,49 @@ class ThemeItem extends Component{
     }
 }
 
+
 const itemStyle = StyleSheet.create({
     container:{
-        width:width*0.5,
-        height:width*0.6,
-        paddingRight: 10,
-        paddingLeft: 0,
+        width:width*0.45,
+        height:'100%',
+        marginLeft:10,
         justifyContent:'center',
         alignItems:'center',
     },
     imageContainer:{
-        flex:1
-    },
-    image:{
         width:width*0.45,
         height:width*0.45,
-        resizeMode:'cover'
+
+        borderColor:'blue',
+        borderWidth:3,
+        marginTop:10
+    },
+
+    image:{
+        width:0,
+        height:0,
+        resizeMode:'contain'
     },
 
 
     titleContainer:{
-        height:60,
-        paddingTop:12,
         width:'100%',
+        paddingTop:5
     },
     title:{
-        fontSize: 14,
+        fontSize: 16,
         color:'#121111',
-        textAlign:'center'
+        fontWeight:'400'
+    },
+
+    subtitleContainer:{
+        flex:1,
+        width:'100%',
+        paddingTop:0
+    },
+    subtitle:{
+        fontSize: 14,
+        color:'#8d8989'
     },
 })
 
@@ -78,7 +101,8 @@ export default class Theme extends Component{
             return(
                 <View style={containerStyle.container}>
                     <View style={containerStyle.titleContainer}>
-                        <Text style={containerStyle.title}>
+                        <Text style={containerStyle.title}
+                            numberOfLines={1}>
                             {title}
                         </Text>
                         <Text style={containerStyle.subTitle}>
@@ -113,8 +137,8 @@ const containerStyle = StyleSheet.create({
     container:{
         alignItems: 'center',
         width: '100%',
-        height: width*0.72,
-        marginTop:45
+        height: width*0.7,
+        marginTop:40
     },
     
 
@@ -122,17 +146,17 @@ const containerStyle = StyleSheet.create({
 
     titleContainer:{
         width: '100%',
-        height:60,
+        height:45,
     },title:{
-        paddingLeft: 25,
-        fontSize: 16,
+        paddingLeft: 20,
+        fontSize: 18,
         fontWeight: "bold",
         paddingBottom:3
     },
     subTitle:{
         color:'#767171',
         fontSize:10,
-        paddingLeft:25,
+        paddingLeft:20,
     },
 
 
@@ -159,7 +183,7 @@ const containerStyle = StyleSheet.create({
     },
 
     itemPadding:{
-        width:20,
+        width:10,
         height:'100%'
     }
 })

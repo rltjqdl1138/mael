@@ -29,7 +29,7 @@ export default class LoginSidebar extends Component{
                             onPress={()=>{
                                 handleMainPush('MyPlaylistPage')
                                 handleClose();}} >
-                            <Text style={styles.gotoPlaylistText}> My playlist 바로가기 > </Text>
+                            <Text style={styles.gotoPlaylistText}>내 플레이리스트 > </Text>
                 </TouchableOpacity>
 
                 <SidebarBanner />
@@ -65,16 +65,11 @@ const styles= StyleSheet.create({
         height:'100%',
     },
     usernameContainer:{
-        height: 40,
-        paddingTop:0,
-        paddingLeft:40,
-        flexDirection:'row',
-        justifyContent:'center',
-        alignItems:'center',
-        alignSelf:'baseline'
+        height: 25,
+        paddingLeft:20,
     },
     usernameText:{
-        fontSize:16,
+        fontSize:17,
         fontWeight:'bold',
         color:'#121111'
     },
@@ -85,35 +80,35 @@ const styles= StyleSheet.create({
 
 
     gotoPlaylistContainer:{
-        height: 40,
+        height: 35,
         width:'100%',
-        paddingLeft:10,
-        justifyContent:'center',
+        paddingLeft:20,
     },
     gotoPlaylistText:{
         width:'100%',
-        fontSize:14,
-        textAlign:'right',
-        paddingRight:20,
-        color:'#121111'
+        fontSize:15,
+        textAlign:'left',
+        color:'#646363'
     },
     
 
     settingContainer:{
-        height:45,
+        height:40,
         margin:0,
         padding:0,
-        marginTop:10,
-        justifyContent:'flex-end'
+        marginTop:4,
+        justifyContent:'flex-end',
+        alignItems:'flex-end'
     },
     settingImage:{
         position:'absolute',
-        right:0,
+        right:-5,
         bottom:0,
         height:'100%',
-        width:'40%',
+        width:'18%',
         resizeMode:'contain',
     },
+
 
 
     bottomLine:{

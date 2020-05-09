@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
         position:'absolute',
         width:'100%',
         height:43,
-        backgroundColor:'#f99',
+        backgroundColor:'#2f2d2d',
         justifyContent:'center',
         top:0
     },
     noticeText:{
         fontSize:14,
-        color:'#fff',
+        color:'#70e255',
         textAlign:'center'
     },
     scroll:{

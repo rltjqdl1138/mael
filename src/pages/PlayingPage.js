@@ -169,9 +169,9 @@ class PlayingPage extends Component{
                         />
                     </Animated.View>
                     <View style={styles.main} >
-                        <View style={{height:30, backgroundColor:'#fafafa'}}/>
+                        <View style={{height:deviceCheck.ifTopbarless?30:10, backgroundColor:'#fff'}}/>
 
-                        <View style={{height:50, backgroundColor:'#fafafa', alignItems:'center'}}>
+                        <View style={{height:50, backgroundColor:'#fff', alignItems:'center'}}>
                             <Image style={{flex:1,resizeMode:'contain'}} source={require('../icon/scrollDown.png')} />
                         </View>
                        <PlayingContainer
