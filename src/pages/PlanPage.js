@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import { View, Text, TouchableOpacity, TouchableHighlight, StyleSheet, Image, ScrollView, Dimensions } from 'react-native'
+import * as InAppPurchases from 'expo-in-app-purchases';
 import networkHandler from '../networkHandler'
 import deviceCheck from '../deviceCheck'
 
@@ -33,7 +34,7 @@ export default class PlanPage extends Component {
     componentDidMount(){
         const notice = '모든 플랜 옵션은 변경 시, 익월 부터 적용됩니다. 정기 구독의 경우 언제든 취소가 가능합니다.'
         const plans = [sub, promo]
-        
+        this.loadPayment()
         setTimeout(()=>{
             this.setState(state=>({
                 ...state,
@@ -41,6 +42,29 @@ export default class PlanPage extends Component {
                 plans
             }))
         },2000)
+    }
+    loadPayment = async()=>{
+        try{ await InAppPurchases.connectAsync() }catch(e){ }
+        
+        try{
+            const items = [
+                'dev.products.gas',
+                'dev.products.premium',
+                'dev.products.gold_monthly',
+                'dev.products.gold_yearly',
+            ]
+            const { responseCode, results } = await InAppPurchases.getProductsAsync(items);
+            
+            if (responseCode === InAppPurchases.IAPResponseCode.OK) {
+                console.warn(results)
+                
+            }
+
+        }catch(e){
+            console.warn('is it error')
+            console.warn(e)
+
+        }
     }
     handleChange = (field, text) => {
         this.setState({

@@ -1,18 +1,19 @@
-const URL = 'http://192.168.1.48:3000'
+//const URL = 'http://192.168.1.48:3000'
 //const URL = 'http://192.168.1.40:3000'
-//const URL = 'http://192.168.0.23:3000'
+const URL = 'http://192.168.0.23:3000'
 
 exports.url = URL
 
-const getCheckID = async (id)=>{
+const getCheckID = async (id, platform)=>{
     if(!id || id === '')
         return {}
-    const response = await fetch(URL+'/api/account/checkid?id='+id)
+    const response = await fetch(URL+'/api/account/checkid?id='+id+'&platform='+(platform?platform:'original'))
     const data = await response.json()
     return data
 }
 const registerAccount = async (payload)=>{
-    const {id, email, password, mobile, name, token, countryCode } = payload
+
+    const {id, password, mobile, countryCode, name, birthday, token} = payload
     console.warn(token)
     try{
         const response = await fetch(URL+'/api/account/register',{
@@ -21,7 +22,7 @@ const registerAccount = async (payload)=>{
                 'Content-Type': 'application/json',
                 'x-access-token':token 
             },body:JSON.stringify({
-                id, email, password, mobile, name, countryCode
+                id, password, mobile, name, countryCode, birthday, platform:'original'
             })
         })
         const data = await response.json()
@@ -30,6 +31,24 @@ const registerAccount = async (payload)=>{
         return null
     }
 }
+const registerFacebookAccount = async (payload)=>{
+    const {id, name, token} = payload
+    try{
+        const response = await fetch(URL+'/api/account/register',{
+            method:'POST',
+            headers:{
+                'Content-Type': 'application/json'
+            },body:JSON.stringify({
+                id, name, fbtoken:token, platform:'facebook'
+            })
+        })
+        const data = await response.json()
+        return data
+    }catch(e){
+        return null
+    }
+}
+
 const getForgotID = async (name, email)=>{
     try{
         const response = await fetch(URL+`/api/account/forgotid?email=${email}&name=${name}`,{
@@ -162,7 +181,16 @@ const Login = async (id, password)=>{
         method:'POST',
         headers:
             { 'Content-Type': 'application/json' },
-        body: JSON.stringify({'id':id, 'password':password, 'deviceID':'1111'})
+        body: JSON.stringify({'id':id, 'password':password, 'deviceID':'1111', platform:'original'})
+    })
+    return (await response.json())
+}
+const facebookLogin = async (id, fbtoken)=>{
+    const response = await fetch(URL+'/api/authentication/',{
+        method:'POST',
+        headers:
+            { 'Content-Type': 'application/json' },
+        body: JSON.stringify({'id':id, 'fbtoken':fbtoken, 'deviceID':'1111', platform:'facebook'})
     })
     const data = await response.json()
     return data
@@ -237,7 +265,7 @@ const getMusicFile = async(url)=>{
 }
 const getCountryCode = async()=>{
     try{
-        const response = await fetch(URL+'/api/authentication/countrylist', {
+        const response = await fetch(URL+'/api/authentication/countrycode', {
             method:'GET',
             headers: {'Content-Type':'application/json'}
         })
@@ -251,10 +279,9 @@ const getCountryCode = async()=>{
 const mobileAuth = async(mobile, countryCode, type) =>{
     if(!mobile || !countryCode || mobile.length < 10 || mobile.length > 11)
         return { success:false }
-    const response = await fetch(URL+'/api/authentication/test',{
+    const response = await fetch(URL+'/api/authentication/message',{
         method:'POST',
-        headers:
-            { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({mobile, countryCode, type})
     })
     const data = await response.json()
@@ -265,11 +292,9 @@ const mobileAuth = async(mobile, countryCode, type) =>{
 const checkMobileAuth = async(mobile, countryCode, key) =>{
     if(!mobile || !countryCode || mobile.length < 10 || mobile.length > 11)
         return {success:false}
-    const response = await fetch(URL+`/api/authentication/test2`,{
-        method:'POST',
-        headers:
-            { 'Content-Type': 'application/json' },
-        body: JSON.stringify({mobile, countryCode, key})
+    const response = await fetch(URL+`/api/authentication/message?mobile=${mobile}&countrycode=${countryCode}&key=${key}`,{
+        method:'GET',
+        headers:{ 'Content-Type': 'application/json' }
     })
     const data = await response.json()
     return data
@@ -283,9 +308,11 @@ exports.account = {
     getAccountinfo,
     registerCredit,
     registerAccount,
+    registerFacebookAccount,
     changeMobile,
     changeEmail,
     Login,
+    facebookLogin,
     checkToken,
 }
 

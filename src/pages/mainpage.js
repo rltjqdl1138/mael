@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Animated, Dimensions, Button, AsyncStorage, Con
 import { connect } from 'react-redux'
 import { AuthenticationActions, AudioActions, MyPlaylistActions, ThemeActions  } from '../store/actionCreator'
 
+
 import HeaderContainer from '../containers/HeaderContainer'
 import SearchContainer from '../containers/SearchContainer'
 import MainContainer from '../containers/MainContainer'
@@ -48,6 +49,7 @@ class MainPage extends Component {
             console.warn(e)
         }
     }
+    
     onPlaybackStatusUpdate = playbackStatus =>{
         if (!playbackStatus.isLoaded) {
             if (playbackStatus.error) {
@@ -125,9 +127,9 @@ class MainPage extends Component {
     handleLogin = async (id, password)=>{
         try{
             const data = await networkHandler.account.Login(id, password)
-            const {success, token, username} = data
+            const {success, token, name} = data
             if(success)
-                await AuthenticationActions.login({token, username})
+                await AuthenticationActions.login({token, username:name})
             
             return success
         }catch(e){

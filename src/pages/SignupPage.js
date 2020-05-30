@@ -3,8 +3,8 @@ import {View, StyleSheet, Text, TextInput, ScrollView, Button, Picker, Touchable
 import SimpleHeader from '../components/SimpleHeader'
 import deviceCheck from '../deviceCheck'
 import networkHandler from '../networkHandler'
+import {AuthenticationActions} from '../store/actionCreator'
 
-const screenHeight = Dimensions.get('window').height - 150
 const size12 = deviceCheck.getFontSize(12)
 const size14 = deviceCheck.getFontSize(14)
 const size17 = deviceCheck.getFontSize(17)
@@ -12,28 +12,39 @@ export default class SignupPage extends Component {
     constructor(props){
         super(props)
         this.state={
-            firstName:'',
-            lastName:'',
+            // TextInput Values
             id:'',
             password:'',
             passwordCheck:'',
-            email:'',
+            name:'',
             countryCode:'82',
             phone:'',
             phoneCheck:'',
+
+            birthday1:'',
+            birthday2:'',
+            birthday3:'',
+
+            // Layout Status
+            isLoaded:false,
+            isMessageSend:false,
             isPickerOpen:false,
             isKeyboardOpen:false,
-            idNotice:'',
-            passwordNotice:'',
-            mobileNotice:'',
-            isLoaded:false,
+
+            // Notice Values
+            idNotice:{text:'',ok:false},
+            passwordNotice:{text:'',ok:false},
+            mobileNotice:{text:'',ok:false},
+
+            //Hidden Values
             countryCodeList:[],
             signupToken:'',
+            focus:'',
+            inputPositions:{isLoaded:false},
             height:0
         }
     }
     checkID = false
-    scrollheight = 0
     async getCountryCode(){
         const result = await networkHandler.info.getCountryCode()
         if(!result.success || !result.list)
@@ -66,35 +77,45 @@ export default class SignupPage extends Component {
         isKeyboardOpen:false}));
     }
     
-    async getIDNotice(id){
-
+    getIDNotice = async ()=>{
+        const {id} = this.state
         this.checkID = false
         if(!id || id==='')
-            return this.handleChange('idNotice','')
+            return this.handleChange('idNotice',{text:'', ok:false})
         else if(id.length < 8)
-            return this.handleChange('idNotice', 'ID는 8자리 이상이어야 합니다.')
+            return this.handleChange('idNotice', {text:'ID는 8자리 이상이어야 합니다.', ok:false})
         else if(id.length >16)
-            return this.handleChange('idNotice', 'ID는 16자리 이하여야 합니다.')
+            return this.handleChange('idNotice', {text:'ID는 16자리 이하여야 합니다.',ok:false})
 
         const result = await networkHandler.account.getCheckID(id)
-
         if(result && result.success && !result.overlaped){
             this.checkID = true
-            return this.handleChange('idNotice', id+'는 사용 가능한 ID입니다.')
+            return this.handleChange('idNotice', {text:id+'는 사용 가능한 ID입니다.', ok:true})
         }
-        return this.handleChange('idNotice', id+'는 이미 사용중인 아이디 입니다.')
+        return this.handleChange('idNotice',{text: id+'는 이미 사용중인 아이디 입니다.', ok:false})
     }
-    getPasswordNotice(){
+    getPasswordNotice( ){
         const {password, passwordCheck} = this.state
+        const number = password.replace(/[^(0-9)]/gi, "")
+        const upper = password.replace(/[^(a-z)]/g, "")
+        const lower = password.replace(/[^(A-Z)]/g, "")
 
-        if(password.length === 0)
-            return this.handleChange('passwordNotice', '')
-        else if(password.length < 8)
-            return this.handleChange('passwordNotice', '비밀번호는 8자리 이상이어야 합니다.')
-        else if(passwordCheck !== password)
-            return this.handleChange('passwordNotice', '입력하신 비밀번호와 확인란의 비밀번호가 다릅니다.')
-
-        return this.handleChange('passwordNotice', '')
+        switch(true){
+            case password.length === 0:
+                return this.handleChange('passwordNotice', {text:'', ok:false})
+            case password.length < 8:
+                return this.handleChange('passwordNotice', {text:'비밀번호는 8자리 이상이어야 합니다.',ok:false})
+            case number.length === 0:
+            case upper.length === 0:
+            case lower.length === 0:
+                return this.handleChange('passwordNotice', {text:'사용할 수 없는 비밀번호입니다.',ok:false})
+            case passwordCheck.length === 0:
+                return this.handleChange('passwordNotice', {text:'사용가능한 비밀번호 입니다.',ok:true})
+            case passwordCheck !== password:
+                return this.handleChange('passwordNotice', {text:'입력하신 비밀번호와 확인란의 비밀번호가 다릅니다.', ok:false})
+            default:
+                return this.handleChange('passwordNotice', {text:'확인되었습니다.', ok:true})
+        }
     }
     getPickerItem = (_code, name, isIOS) =>{
         if(!_code || !name) return null
@@ -109,8 +130,7 @@ export default class SignupPage extends Component {
                 this.getPickerItem(item.code, item.name, deviceCheck.ifIOS)
             )
 
-        if(deviceCheck.ifIOS){
-            return(
+        return deviceCheck.ifIOS ? (
                 <View style={[styles.pickerContainer, {display:this.state.isPickerOpen?'flex':'none'}]}>
                     <Picker style={{width:'100%', height:'100%'}}
                         itemStyle={{fontSize: 13, color:'#121111'}}
@@ -118,66 +138,98 @@ export default class SignupPage extends Component {
                         onValueChange={text=>this.handleChange('countryCode',text)} >
                             {pickerItems}
                     </Picker>
-                </View>
-            )
-        }
-        return(
-                <Picker style={styles.androidPickerContainer}
+                </View>) :
+                (<Picker style={styles.androidPickerContainer}
                     selectedValue={this.state.countryCode}
                     onValueChange={text=>this.handleChange('countryCode',text)} >
                         {pickerItems}
-                </Picker>        
-        )
+                </Picker>)
     }
     handleChange = (field, text) => {
-        if(field === this.state.phoneCheck)
-            return this.setState({ [field]:text.replace(/[^(0-9)]/gi, "").slice(0,6)})
-        this.setState({ [field]: text });
+        switch(field){
+            case 'id':
+                return this.setState({ [field]:text},()=>this.getIDNotice())
+            case 'password':
+            case 'passwordCheck':
+                return this.setState({ [field]:text},()=>this.getPasswordNotice())
+            case 'phonecheck':
+                return this.setState({ [field]:text.replace(/[^(0-9)]/gi, "").slice(0,6)})
+            default:
+                return this.setState({ [field]:text })
+        }
     }
     sendMessage = async ()=>{
         const {phone,countryCode}=this.state
+        if(phone.length < 10)
+            return this.handleChange('mobileNotice',{text:'올바른 휴대전화 번호를 입력해주세요', ok:false})
+        this.handleChange('isLoaded', false)
         const response = await networkHandler.info.mobileAuth(phone, countryCode, 0)
         if(response.success)
-            return alert('success')
+            return this.setState(state=>({
+                ...state,
+                isMessageSend:true,
+                mobileNotice:{text:'메세지가 전송되었습니다. 3분 내로 인증확인을 해주세요.', ok:true}
+            }))
         alert('fail')
     }
     keyCheck = async() =>{
-        const {phone, countryCode, phoneCheck} = this.state
+        const {phone, countryCode, phoneCheck, isMessageSend} = this.state
+        if(!isMessageSend)
+            return this.handleChange('mobileNotice', {text:'인증받기 버튼을 눌러 메세지를 받아주세요', ok:false})
+        else if(phoneCheck.length < 6)
+            return this.handleChange('mobileNotice', {text:'인증번호 6자리를 입력해주세요', ok:false})
         const response = await networkHandler.info.checkMobileAuth(phone, countryCode, phoneCheck)
         console.warn(response)
         if(!response.success || !response.token)
-            return this.handleChange('mobileNotice', '인증번호가 올바르지 않습니다.')
+            return this.handleChange('mobileNotice', {text:'인증번호가 올바르지 않습니다.', ok:false})
         return this.setState(state=>({
             ...state,
-            mobileNotice:'인증에 성공하였습니다.',
+            mobileNotice:{text:'인증에 성공하였습니다.', ok:true},
             signupToken: response.token
         }))
     }
     async completeSignup(){
+        const {id, password, passwordCheck, name, birthday1, birthday2, birthday3, phone, countryCode, signupToken} = this.state
+        const {idNotice, passwordNotice, mobileNotice} = this.state
+        const birthday = (birthday1 + birthday2 + birthday3)
+        switch(true){
+            case id.length === 0:
+            case password.length === 0:
+            case passwordCheck.length === 0:
+            case name.length === 0:
+            case birthday.length === 0:
+                return alert('빈칸')
 
-        return this.props.navigator.push('GreetingPage')
-        const {id, password, phone, countryCode, passwordCheck, firstName, lastName, email, signupToken} = this.state
-        if(id === '' || password === '' || phone === '' || countryCode === '' || passwordCheck ==='' || firstName === '' || lastName === '' || email === '')
-            return;
-        else if(password !== passwordCheck)
-            return;
+            case signupToken.length === 0:
+                return alert('인증 필요')
+
+            case !idNotice.ok:
+                return alert(idNotice.text)
+            case !passwordNotice.ok:
+                return alert(passwordNotice.text)
+            case !mobileNotice.ok:
+                return alert(mobileNotice.text)
+            
+
+            default:
+                const payload = {id, password, mobile:phone, countryCode, name, birthday, token:signupToken}
+                const result = await networkHandler.account.getCheckID(id)
+                if(!result || !result.success)
+                    return alert('통신 오류')
+                else if(result.overlaped)
+                    return this.handleChange('idNotice',{text:`${id}는 이미 사용중인 아이디입니다.`})
+                
+                const response = await networkHandler.account.registerAccount(payload)
+                response.success ? AuthenticationActions.login({token:signupToken, username:name}) : null
+                return response.success ? this.props.navigator.push('GreetingPage') : alert('실패')
+        }
         
-        const result = await networkHandler.account.getCheckID(id)
-        if(!result || !result.success || result.overlaped)
-            return;
-        else if(!signupToken || signupToken ==='')
-            return;
-        const payload = {id, password, mobile:phone, countryCode, email, name:firstName+lastName, token:signupToken }
-        const response = await networkHandler.account.registerAccount(payload)
-        if(response.success)
-            return this.props.navigator.push('GreetingPage')
-
-
     }
     render(){
         const {handleChange} = this
         const {navigator} = this.props
-        const {idNotice, passwordNotice, mobileNotice} = this.state
+        const {idNotice, passwordNotice, mobileNotice, countryCodeList, isMessageSend, isLoaded} = this.state
+        const {birthday1, birthday2, birthday3} = this.state
         return(
             <View style={styles.container}>
 
@@ -189,100 +241,107 @@ export default class SignupPage extends Component {
 
                 <ScrollView style={styles.mainContainer}
                     ref='scrollView'
-                    onContentSizeChange={(w,h)=>{
-                        if(!this.needUp)
-                            return;
-                        const _height = this.scrollheight + screenHeight
-                        const height = this.scrollheight + this.state.height
-                        this.needUp = false
-                        const scrollResponder = this.refs.scrollView.getScrollResponder();
-                        scrollResponder.scrollResponderScrollTo({x: 0, y: height, animated:true})
+                    onLayout={()=>{
+                        let position = {isLoaded:true}
+                        this.refs.idInput.measure((x, y, width, height, pageX, pageY) => {position.id = y })
+                        this.refs.passwordInput.measure((x, y, width, height, pageX, pageY) => {position.password = y; position.passwordCheck = y })
+                        this.refs.nameInput.measure((x, y, width, height, pageX, pageY) => {position.name = y })
+                        this.refs.birthdayInput.measure((x, y, width, height, pageX, pageY) => {position.birthday = y })
+                        this.refs.phoneInput.measure((x, y, width, height, pageX, pageY) => {position.phone = y; position.phoneCheck = y })
+
+                        return this.state.inputPositions.isLoaded ? null: handleChange('inputPositions', position)
                     }}
-                    onScrollBeginDrag={()=>{handleChange('isPickerOpen',false)}}
-                    onScroll={({nativeEvent})=> {
-                        this.scrollheight = nativeEvent.contentOffset.y}
-                    }>
-                    <View style={styles.accountInform}>
-                        <Text style={styles.subtitle} >이름</Text>
-                        <View style={styles.inputBoxContainer} >
-                            <TextInput style={styles.inputBox}
-                                placeholder="성"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('firstName',text)}
-                            />
-                        </View>
-                        <View style={styles.simplePadding}/>
-                        <View style={styles.inputBoxContainer} >
-                            <TextInput style={styles.inputBox}
-                                placeholder="이름"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('lastName',text)}
-                            />
-                        </View>
 
-                        <View style={styles.simplePadding}/>
-                    </View>
+                    onContentSizeChange={(w,h)=>{
+                        const {inputPositions, focus} = this.state
+                        const scrollResponder = this.refs.scrollView.getScrollResponder();
+                        return focus && focus.length > 0 ?
+                            scrollResponder.scrollResponderScrollTo({x: 0, y: inputPositions[focus], animated:true}) : null
+                    }}
 
+                    onScrollBeginDrag={()=>{handleChange('isPickerOpen',false)}} >
+                            
+                    <View ref="idInput" style={{height:40}} />
+                    <InputContainer
+                        title='ID'
+                        list={[{ key:'id', name:'ID' }]}
+                        handleChange={handleChange}
+                        notice={idNotice}
+                    />
+                    <View ref="passwordInput"/>
+                    <InputContainer
+                        title='PASSWORD'
+                        list={[{key:'password', name:'비밀번호'},
+                            {key:'passwordCheck', name:'비밀번호 확인'}]}
+                        handleChange={handleChange}
+                        notice={passwordNotice}
+                        isSecret={true}
+                    />
 
-                    <View style={styles.IDPW}>
-                        <Text style={styles.subtitle} allowFontScaling={false}>ID / PASSWORD</Text>
-                        <View style={styles.inputBoxContainer} >
-                            <TextInput style={styles.inputBox}
-                                placeholder="ID"
-                                placeholderTextColor='#888'
+                    <View ref="nameInput"/>
+                    <InputContainer
+                        title='이름'
+                        list={[{key:'name', name:'이름'}]}
+                        handleChange={handleChange}
+                    />
 
-                                onFocus={()=>{this.needUp=true}}
-                                onChangeText={text=>{
-                                    handleChange('id',text)
-                                    this.getIDNotice(text)
-                                }}/>
-                        </View>
-                        <View style={styles.textPadding}>
-                            <Text style={styles.okText} >
-                                {idNotice}
-                            </Text>
-                        </View>
+                    <View ref="birthdayInput"/>
+                    <View style={{paddingLeft:25, paddingRight:25}}>
+                        <Text style={styles.subtitle}>생년월일</Text>
                         <View style={styles.inputBoxContainer}>
-                            <TextInput style={styles.inputBox}
-                                placeholder="비밀번호"
-                                placeholderTextColor='#888'
-                                secureTextEntry={true}
-                                onChangeText={text=>handleChange('password',text)}
+                            <View style={[styles.inputBox,{alignItems:'center', justifyContent:'center'}]}>
+                                
+                                <TextInput style={{width:60}}
+                                    ref="birthday1"
+                                    placeholder="YYYY"
+                                    placeholderTextColor='#888'
+                                    keyboardType="number-pad"
+                                    onChangeText={text=>{
+                                        handleChange('birthday1',text)
+                                        parseInt(text) >= 1000 ? this.refs.birthday2.focus() : null
+                                    }}
+                                    maxLength={4}
+                                />
+                                <Text style={{paddingRight:20}}>년</Text>
+                                <TextInput style={{width:40}}
+                                    ref="birthday2"
+                                    placeholder="MM"
+                                    placeholderTextColor='#888'
+                                    keyboardType="number-pad"
+                                    onChangeText={text=>{
+                                        handleChange('birthday2',text)
+                                        if(text.length === 0) 
+                                            return this.refs.birthday1.focus()
+                                        parseInt(text) >= 3 ? this.refs.birthday3.focus() : null
+                                    }}
+                                    maxLength={2}
+                                />
 
-                                onFocus={()=>{this.needUp=true}}
-                            />
-                        </View>
-                        <View style={styles.simplePadding}/>
-                        <View style={styles.inputBoxContainer} >
-                            <TextInput style={styles.inputBox}
-                                placeholder="비밀번호 확인"
-                                placeholderTextColor='#888'
-                                secureTextEntry={true}
-                                onChangeText={text=>handleChange('passwordCheck',text)}
+                                <Text style={{paddingRight:20}}>월</Text>
+                                <TextInput style={{width:40}}
+                                    ref="birthday3"
+                                    placeholder="DD"
+                                    placeholderTextColor='#888'
+                                    keyboardType="number-pad"
+                                    onChangeText={text=>{
+                                        handleChange('birthday3',text)
+                                        if(text.length === 0) 
+                                            return this.refs.birthday2.focus()
+                                    }}
+                                    maxLength={2}
+                                />
 
-                                onFocus={()=>{this.needUp=true}}
-                            />
+                                <Text style={{paddingRight:20}}>일</Text>
+                            </View>
                         </View>
-                        <View style={styles.textPadding}>
-                            <Text style={styles.errText} >
-                                {passwordNotice}
-                            </Text>
-                        </View>
+                        <View style={{height:20}}/>
                     </View>
-
-
-                    <View style={styles.PhoneEmail}>
+                    
+                    <View ref="phoneInput"/>
+                    <View style={{paddingLeft:25, paddingRight:25}}>
                         <Text style={styles.subtitle} >EMAIL / PHONE</Text>
-                        <View style={styles.inputBoxContainer} >
-                            <TextInput style={styles.inputBox}
-                                placeholder="이메일"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('email',text)}
-                                onFocus={()=>{this.needUp=true}}
-                            />
-                        </View>
-                        <View style={styles.simplePadding}/>
                         <View style={{flexDirection:'row',width:'100%'}} >
+
                             <TouchableOpacity style={styles.countryCodeBox}
                                 onPress={()=>handleChange('isPickerOpen',!this.state.isPickerOpen)}>
                                 <View style={styles.countryCodeTextContainer}>
@@ -291,25 +350,25 @@ export default class SignupPage extends Component {
                                     </Text>
                                 </View>
                                 <View style={styles.countryCodeButton}>
-                                    <Image
-                                        style={styles.countryCodeButtonImage}
-                                        source={require('../icon/countryCode.png')}
-                                    />
-
+                                    <Image style={styles.countryCodeButtonImage}
+                                        source={require('../icon/countryCode.png')} />
                                 </View>
                             </TouchableOpacity>
+
                             <View style={styles.phoneinputBox}>
-                                <TextInput style={{flex:1}}
+                                <TextInput style={{flex:1, color: isMessageSend?'#767171':'#121111'}}
                                     keyboardType="number-pad"
                                     placeholder="휴대전화"
                                     placeholderTextColor='#888'
+                                    editable={!isMessageSend}
                                     onChangeText={text=>handleChange('phone',text)}
-                                    onFocus={()=>{this.needUp=true}}
+                                    onFocus={()=>{handleChange('focus','phone')}}
                                 />
-                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
-                                    onPress={this.sendMessage}>
+                                { isMessageSend || this.state.signupToken ? null:(<TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                    onPress={this.sendMessage}
+                                    disabled={!isLoaded}>
                                     <Text style={{fontSize:13, color:'#121111'}}>인증받기</Text>
-                                </TouchableOpacity>
+                                </TouchableOpacity>)}
 
                             </View>
                         </View>
@@ -323,23 +382,24 @@ export default class SignupPage extends Component {
                                     keyboardType="number-pad"
                                     placeholderTextColor='#888'
                                     onChangeText={text=>handleChange('phoneCheck',text)}
-                                    onFocus={()=>{this.needUp=true}}
+                                    onFocus={()=>{handleChange('focus','phoneCheck')}}
                                 />
 
-                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                {this.state.signupToken?null:(<TouchableOpacity style={{width:60, justifyContent:'center'}}
                                     onPress={this.keyCheck}>
                                     <Text style={{fontSize:13, color:'#121111'}}>인증확인</Text>
-                                </TouchableOpacity>
+                                </TouchableOpacity>)}
                             </View>
                         </View>
 
                         <View style={styles.textPadding}>
-                            <Text style={styles.okText}>
-                                {mobileNotice}
+                            <Text style={mobileNotice.ok?styles.okText:styles.errText}>
+                                {mobileNotice.text}
                             </Text>
                         </View>
                         {this.getPicker()}
                         <View style={styles.simplePadding}/>
+                        
                     </View>
 
                     <View style={styles.enterButtonContainer}>
@@ -353,12 +413,44 @@ export default class SignupPage extends Component {
                     </View>
                 <View style={{width:'100%',height:this.state.height}} />
                 </ScrollView>
-
-
             </View>
         )
     }
 }
+
+class InputContainer extends Component {
+    render(){
+        // key, name
+        const { title, list, handleChange, notice, isSecret } = this.props
+        const items = list.map( (item, index)=>(
+            <View key={item.key}>
+                <View style={styles.inputBoxContainer}>
+                    <TextInput style={styles.inputBox}
+                        onFocus={()=>handleChange('focus',item.key)}
+                        placeholder={item.name}
+                        placeholderTextColor='#888'
+                        secureTextEntry={isSecret}
+                        onChangeText={text=> handleChange(item.key, text) }/>
+                </View>
+                <View style={{height:5}} />
+            </View>
+        ))
+
+        return(
+            <View style={{paddingLeft:25, paddingRight:25}}>
+                <Text style={styles.subtitle}>{title}</Text>
+                {items}
+
+                {notice?
+                    (<Text style={notice.ok?styles.okText:styles.errText}>
+                        {notice.text}
+                    </Text>) : null}
+                <View style={{height:20}}/>
+            </View>
+        )
+    }
+}
+//secureTextEntry={true}
 
 const styles=StyleSheet.create({
     container:{
@@ -372,10 +464,14 @@ const styles=StyleSheet.create({
         flex:1
     },
 
+    subContainer:{
+        
+    },
+
     subtitle:{
         fontSize: size17,
         color: '#121111',
-        paddingBottom:20
+        paddingBottom:5
     },
 
     accountInform:{
@@ -419,6 +515,7 @@ const styles=StyleSheet.create({
         marginLeft:12,
         justifyContent:'center'
     },
+
     okText:{
         fontSize:size12,
         color:'#96e255'
@@ -468,9 +565,9 @@ const styles=StyleSheet.create({
     pickerContainer:{
         position:'absolute',
         left:25,
-        top:180,
-        width:60,
-        height:180,
+        top:65,
+        width:80,
+        height:200,
         backgroundColor:'#fff',
         borderWidth:1,
         borderRadius:10,
@@ -505,65 +602,4 @@ const styles=StyleSheet.create({
         width:'100%'
     }
 
-})
-
-
-class CountryCodePicker extends Component {
-    render(){
-        const {countryCode, handleChange, isOpen, handleClose} = this.props
-        return (
-            <View style={[pickerStyle.container,{display: isOpen?'flex':'none'}]}>
-                <View style={pickerStyle.headerContainer}>
-                    <TouchableOpacity style={pickerStyle.doneButton}
-                        onPress={handleClose} >
-                        <Text style={pickerStyle.doneText}>
-                            Done
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                <Picker style={{width:50, height:250}}
-                    selectedValue={countryCode}
-                    onValueChange={text=>handleChange('countryCode',text)} >
-                        <Picker.Item label="082" value="082" />
-                        <Picker.Item label="002" value="002" />
-                        <Picker.Item label="003" value="003" />
-                        <Picker.Item label="004" value="004" />
-                        <Picker.Item label="005" value="005" />
-                        <Picker.Item label="006" value="006" />
-                </Picker>
-
-            </View>
-        )
-    }
-}
-const pickerStyle = StyleSheet.create({
-    container:{
-        width:50,
-        height:250,
-        borderColor:'#000',
-        borderWidth:1,
-        borderRadius:10,
-        alignSelf:'center'
-    },
-    headerContainer:{
-        width:'100%',
-        flex:1,
-        backgroundColor:'#ddd',
-        justifyContent:'center',
-        alignItems:'flex-end'
-    },
-    doneButton:{
-        width:60,
-        height:'80%',
-        backgroundColor:'#aaa',
-        marginRight:20,
-        justifyContent:'center',
-        borderColor:'#121212',
-        borderWidth:1,
-        borderRadius:10
-    },
-    doneText:{
-        textAlign:'center',
-        fontSize:size14
-    }
 })

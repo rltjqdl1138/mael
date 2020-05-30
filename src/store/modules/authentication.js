@@ -34,7 +34,7 @@ export default handleActions({
     [LOGIN]: (state, {payload})=>{
         const {token, username} = payload
         _storeData({token, username})
-        console.log(token, username)
+        console.warn(token, username)
         return {
             isLogin: true,
             token,

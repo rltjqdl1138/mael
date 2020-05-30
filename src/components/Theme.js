@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import {StyleSheet, View, TouchableOpacity, ScrollView, Image, Text, Dimensions } from 'react-native'
+import AlbumArt from '../components/AlbumArt'
 const { width } = Dimensions.get('window')
+
 
 class ThemeItem extends Component{
     render(){
@@ -9,11 +11,9 @@ class ThemeItem extends Component{
             <TouchableOpacity style={itemStyle.container}
                 onPress={()=>navigator.push('AlbumContainer',{title, albumID})}>
 
-                <View style={itemStyle.imageContainer}>
-                    <Image style={itemStyle.image}
-                        source={require('../image/class.jpeg')}
-                    />
-                </View>
+                <AlbumArt style={itemStyle.imageContainer}
+                    url="class.jpeg"
+                />
 
                 <View style={itemStyle.titleContainer}>
                     <Text style={itemStyle.title}
@@ -46,9 +46,6 @@ const itemStyle = StyleSheet.create({
     imageContainer:{
         width:width*0.45,
         height:width*0.45,
-
-        borderColor:'blue',
-        borderWidth:3,
         marginTop:10
     },
 

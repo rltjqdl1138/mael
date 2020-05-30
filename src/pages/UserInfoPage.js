@@ -35,7 +35,7 @@ export default class UserInformationPage extends Component{
         const {name, email, phone, isLoaded} = this.state
         const _infoList = [
             {key:'성명', value:name, nextPage:null},
-            {key:'이메일', value:email, nextPage:'ChangeEmailPage'},
+            {key:'생년월일', value:email, nextPage:'ChangeEmailPage'},
             {key:'전화번호', value:phone, nextPage:'ChangePhonePage'}
         ]
 

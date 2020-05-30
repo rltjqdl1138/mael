@@ -1,32 +1,36 @@
 import React, {Component} from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard, Image } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard, Image, Picker } from 'react-native'
 
 import SimpleHeader from '../components/SimpleHeader'
 import networkHandler from '../networkHandler'
-import {account} from '../networkHandler'
+import deviceCheck from '../deviceCheck'
 
 export default class FindIDContainer extends Component {
     constructor(props){
         super(props)
         this.state = {
-            lastName: '',
-            firstName: '',
-            email: '',
-            ifCorrect: false,
-            foundID:'',
-            notice:'',
+            name:'',
+            phone:'',
+            phoneCheck:'',
             countryCode:'82',
+            notice:'',
+
+            isLoaded:false,
+            isMessageSend:false,
+            isPickerOpen:false,
+
             countryCodeList:[],
-            isLoaded:false
+            signupToken:''
         }
     }
     componentDidMount(){
         this.getCountryCode()
     }
+
     async getCountryCode(){
         const result = await networkHandler.info.getCountryCode()
         if(!result.success || !result.list)
-            return;
+            return navigator.pop('FindIDPage')
         this.setState((state)=>({
             ...state,
             isLoaded:true,
@@ -38,6 +42,54 @@ export default class FindIDContainer extends Component {
             [field]: text
         });
     }
+
+    sendMessage = async ()=>{
+        const {phone,countryCode}=this.state
+        if(phone.length < 10)
+            return this.handleChange('notice','올바른 휴대전화 번호를 입력해주세요')
+        this.handleChange('isLoaded', false)
+        const response = await networkHandler.info.mobileAuth(phone, countryCode, 0)
+        if(response.success)
+            return this.setState(state=>({
+                ...state,
+                isMessageSend:true,
+                notice:'메세지가 전송되었습니다. 3분 내로 인증확인을 해주세요.'
+            }))
+        alert('fail')
+    }
+    keyCheck = async() =>{
+        const {phone, countryCode, phoneCheck, isMessageSend} = this.state
+        if(!isMessageSend)
+            return this.handleChange('notice','인증받기 버튼을 눌러 메세지를 받아주세요')
+        else if(phoneCheck.length < 6)
+            return this.handleChange('notice','인증번호 6자리를 입력해주세요')
+        const response = await networkHandler.info.checkMobileAuth(phone, countryCode, phoneCheck)
+        console.warn(response)
+        if(!response.success || !response.token)
+            return this.handleChange('notice', '인증번호가 올바르지 않습니다.')
+        return this.setState(state=>({
+            ...state,
+            notice:'인증에 성공하였습니다.',
+            signupToken: response.token
+        }))
+    }
+
+    handleComplete = ()=>{
+        const {signupToken, name, navigator} = this.state
+        const {handleChange} = this
+        switch(true){
+            case name ==='':
+                return handleChange('notice', '이름을 입력해주세요')
+
+            case signupToken === '':
+                return handleChange('notice', '인증을 먼저 완료해주세요')
+
+            default:
+                handleChange('notice', '')
+                navigator.push('FindPasswordPage',{token:signupToken})
+        }
+    }
+
     getPickerItem = (_code, name, isIOS) =>{
         if(!_code || !name) return null
         else if(isIOS)
@@ -50,8 +102,7 @@ export default class FindIDContainer extends Component {
                 this.getPickerItem(item.code, item.name, deviceCheck.ifIOS)
             )
 
-        if(deviceCheck.ifIOS){
-            return(
+        return deviceCheck.ifIOS ? (
                 <View style={[styles.pickerContainer, {display:this.state.isPickerOpen?'flex':'none'}]}>
                     <Picker style={{width:'100%', height:'100%'}}
                         itemStyle={{fontSize: 13, color:'#121111'}}
@@ -59,106 +110,63 @@ export default class FindIDContainer extends Component {
                         onValueChange={text=>this.handleChange('countryCode',text)} >
                             {pickerItems}
                     </Picker>
-                </View>
-            )
-        }
-        return(
-            <Picker style={styles.androidPickerContainer}
-                selectedValue={this.state.countryCode}
-                onValueChange={text=>this.handleChange('countryCode',text)} >
-                    {pickerItems}
-            </Picker>        
-        )
-    }
-    getNotice = ()=>{
-        if(this.state.ifCorrect)
-            return ''
-        else
-            return '해당 정보와 일치하는 가입정보가 없습니다.'
-    }
-    getID = async ()=>{
-        Keyboard.dismiss()
-        const {lastName, firstName, email} = this.state
-        if(lastName==='' || firstName ==='' || email === '')
-            return this.setState(state=>({
-                ...state,
-                notice:'아래 정보를 모두 기입해주세요.',
-                ifCorrect: false
-            }))
-
-        const data = await account.getForgotID(lastName+firstName, email)
-        if(data && data.success && data.id)
-            this.setState(state=>({
-                ...state,
-                foundID: data.id,
-                notice:'',
-                ifCorrect: true  }))
-        else
-            this.setState(state=>({
-                ...state,
-                notice:'해당 정보와 일치하는 가입정보가 없습니다.',
-                ifCorrect: false
-            }))
+                </View>) :
+                (<Picker style={styles.androidPickerContainer}
+                    selectedValue={this.state.countryCode}
+                    onValueChange={text=>this.handleChange('countryCode',text)} >
+                        {pickerItems}
+                </Picker>)
     }
     render(){
         const {navigator} = this.props
-        const {handleChange, getID} = this
-        const {mobileNotice} = this.state
+        const {handleChange, handleComplete} = this
+        const {notice, countryCode, signupToken, isPickerOpen, isMessageSend, isLoaded} = this.state
         return(
             <View style={styles.container}>
-
                 <SimpleHeader 
                     title="아이디 찾기"
                     handler={()=>{navigator.pop('FindIDPage')}}
-                    notice={this.state.notice} />
+                    handleComplete={{title:'다음', handler:()=>handleComplete()}}
+                    notice={notice} />
 
                 <View style={styles.mainContainer}>
-                    <View style={styles.informationContainer}>
-                        <View style={styles.inputBoxContainer}>
-                            <TextInput style={styles.inputBox}
-                                placeholder="성"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('lastName',text)}
-                            />
-                        </View>
-
-                        <View style={styles.inputBoxContainer}>
-                            <TextInput style={styles.inputBox}
-                                placeholder="이름"
-                                placeholderTextColor='#888'
-                                onChangeText={text=>handleChange('firstName',text)}
-                            />
-                        </View>
-                        <View style={{flexDirection:'row',width:'100%'}} >
-                            <TouchableOpacity style={styles.countryCodeBox}
-                                onPress={()=>handleChange('isPickerOpen',!this.state.isPickerOpen)}>
-                                <View style={styles.countryCodeTextContainer}>
-                                    <Text style={styles.countryCodeText} >
-                                        {'+ '+this.state.countryCode}
-                                    </Text>
-                                </View>
-                                <View style={styles.countryCodeButton}>
-                                    <Image
-                                        style={styles.countryCodeButtonImage}
-                                        source={require('../icon/countryCode.png')}
-                                    />
-
-                                </View>
-                            </TouchableOpacity>
-                            <View style={styles.phoneinputBox}>
-                                <TextInput style={{flex:1}}
-                                    keyboardType="number-pad"
-                                    placeholder="휴대전화"
-                                    placeholderTextColor='#888'
-                                    onChangeText={text=>handleChange('phone',text)}
-                                    onFocus={()=>{this.needUp=true}}
-                                />
-                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
-                                    onPress={this.sendMessage}>
-                                    <Text style={{fontSize:13, color:'#121111'}}>인증받기</Text>
-                                </TouchableOpacity>
-
+                    <View style={styles.inputBoxContainer}>
+                        <TextInput style={styles.inputBox}
+                            placeholder="이름"
+                            placeholderTextColor='#888'
+                            onChangeText={text=>handleChange('name',text)} />
+                    </View>
+                    <View style={styles.simplePadding} />
+                    <View style={{flexDirection:'row',width:'100%'}} >
+                        <TouchableOpacity style={styles.countryCodeBox}
+                            onPress={()=>handleChange('isPickerOpen',!isPickerOpen)}>
+                            <View style={styles.countryCodeTextContainer}>
+                                <Text style={styles.countryCodeText} >
+                                    {'+ '+countryCode}
+                                </Text>
                             </View>
+                            <View style={styles.countryCodeButton}>
+                                <Image style={styles.countryCodeButtonImage}
+                                    source={require('../icon/countryCode.png')} />
+                            </View>
+                        </TouchableOpacity>
+
+                        <View style={styles.phoneinputBox}>
+                            <TextInput style={{flex:1, color: isMessageSend?'#767171':'#121111'}}
+                                keyboardType="number-pad"
+                                placeholder="휴대전화"
+                                placeholderTextColor='#888'
+                                editable={!isMessageSend}
+                                onChangeText={text=>handleChange('phone',text)}
+                                onFocus={()=>{handleChange('focus','phone')}}
+                            />
+                            { isMessageSend || signupToken ? null:(<TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                onPress={this.sendMessage}
+                                disabled={!isLoaded}>
+                                <Text style={{fontSize:13, color:'#121111'}}>인증받기</Text>
+                            </TouchableOpacity>)}
+
+                        </View>
                         </View>
 
                         <View style={styles.simplePadding}/>
@@ -170,56 +178,20 @@ export default class FindIDContainer extends Component {
                                     keyboardType="number-pad"
                                     placeholderTextColor='#888'
                                     onChangeText={text=>handleChange('phoneCheck',text)}
-                                    onFocus={()=>{this.needUp=true}}
+                                    onFocus={()=>{handleChange('focus','phoneCheck')}}
                                 />
 
-                                <TouchableOpacity style={{width:60, justifyContent:'center'}}
+                                {signupToken?null:(<TouchableOpacity style={{width:60, justifyContent:'center'}}
                                     onPress={this.keyCheck}>
                                     <Text style={{fontSize:13, color:'#121111'}}>인증확인</Text>
-                                </TouchableOpacity>
+                                </TouchableOpacity>)}
                             </View>
                         </View>
 
-                        <View style={styles.textPadding}>
-                            <Text style={styles.okText}>
-                                {mobileNotice}
-                            </Text>
-                        </View>
-
+                        {this.getPicker()}
+                        <View style={styles.simplePadding}/>
+                        
                     </View>
-                    
-                    <View style={styles.enterContainer}>
-                        <TouchableOpacity style={styles.enterBox}
-                            onPress={getID} >
-                            <Text style={styles.enterText}>
-                                확인
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.foundIDContainer}>
-                        <Text style={styles.foundIDNotice}> {this.state.ifCorrect?'회원님의 ID는':''} </Text>
-                        <Text style={styles.foundIDText}  > {this.state.ifCorrect?this.state.foundID:''}</Text>
-                        <Text style={styles.foundIDNotice}> {this.state.ifCorrect?'입니다':''} </Text>
-                    </View>
-                    <View style={styles.linkContainer}>
-                        <TouchableOpacity style={styles.loginContainer}
-                            onPress={()=>{
-                                navigator.pop('FindIDPage') }}>
-                            <Text style={styles.loginText}>
-                                로그인하기 >
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.findPasswordContainer}
-                            onPress={()=>{navigator.push('FindPasswordPage')}}>
-                            <Text style={styles.findPasswordText}>
-                                비밀번호 찾기 >
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    
-                </View>
-
-                
             </View>
         )
     }
@@ -234,73 +206,9 @@ const styles = StyleSheet.create({
 
     mainContainer:{
         width:'100%',
-        flex:1
+        height:100,
+        padding:25
     },
-
-    noticeContainer:{
-        width:'100%',
-        height:43,
-        backgroundColor:'#f99',
-        justifyContent:'center'
-    },
-    noticeText:{
-        fontSize:14,
-        textAlign:'center',
-        color:'#fff'
-    },
-
-    informationContainer:{
-        alignItems:'center',
-        marginLeft:25,
-        marginRight:25
-    },
-    inputBoxContainer:{
-        width:'100%',
-        height:60,
-        borderBottomWidth:1,
-        borderBottomColor:'#ddd',
-        justifyContent:'flex-end'
-    },
-    inputBox:{
-        width:'100%',
-        height:'60%',
-        marginLeft:20
-    },
-    
-
-    enterContainer:{
-        width:'100%',
-        justifyContent:'center',
-        alignItems:'center',
-        paddingTop:55
-    },
-    enterBox:{
-        backgroundColor:'#000',
-        width: 130,
-        height: 45,
-        borderRadius: 50,
-        justifyContent:'center'
-    },
-    enterText:{
-        textAlign:'center',
-        fontSize:17,
-        color:'#fff'
-    },
-
-    foundIDContainer:{
-        width:'100%',
-        alignItems:'center',
-        paddingTop:40
-    },
-    foundIDText:{
-        fontSize:15,
-        color:'#FF6E43'
-    },
-    foundIDNotice:{
-        fontSize:15,
-        color:'#080808'
-    },
-
 
     inputBoxContainer:{
         width:'100%',
@@ -319,66 +227,69 @@ const styles = StyleSheet.create({
         width:'100%',
         height:15
     },
-    textPadding:{
-        width:'100%',
-        height:26,
-        marginLeft:12,
+
+
+    countryCodeBox:{
+        width:80,
+        height: 42,
+        paddingLeft:10,
+
+        borderRadius:15,
+        borderWidth:1,
+        borderColor:'#ddd',
+        flexDirection:'row'
+    },
+    countryCodeTextContainer:{
+        flex:1,
         justifyContent:'center'
     },
-    okText:{
-        fontSize:12,
-        color:'#96e255'
+    countryCodeText:{
+        textAlign:'center'
+    },
+    countryCodeButton:{
+        width:20,
+        height:'100%',
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    countryCodeButtonImage:{
+        width:'50%',
+        resizeMode:'contain'
+    },
+    phoneinputBox:{
+        flex:1,
+        height: 42,
+        marginLeft:10,
+        paddingLeft:20,
+        borderRadius:15,
+        borderWidth:1,
+        borderColor:'#ddd',
+        flexDirection:'row'
     },
 
-    linkContainer:{
-        paddingTop:76,
-        paddingLeft:45
-    },
-    loginContainer:{
-
-    },
-    loginText:{
-        fontSize: 14,
-        color:'#848484'
-    },
-    findPasswordContainer:{
-        paddingTop:25
-    },
-    findPasswordText:{
-        fontSize: 14,
-        color:'#70e255'
-    }
-})
-
-
-const pickerStyle = StyleSheet.create({
-    container:{
-        width:50,
-        height:250,
-        borderColor:'#000',
+    pickerContainer:{
+        position:'absolute',
+        left:25,
+        top:110,
+        width:80,
+        height:200,
+        backgroundColor:'#fff',
         borderWidth:1,
         borderRadius:10,
-        alignSelf:'center'
+        borderColor:'#ddd'
     },
-    headerContainer:{
-        width:'100%',
-        flex:1,
-        backgroundColor:'#ddd',
-        justifyContent:'center',
-        alignItems:'flex-end'
-    },
-    doneButton:{
-        width:60,
-        height:'80%',
-        backgroundColor:'#aaa',
-        marginRight:20,
-        justifyContent:'center',
-        borderColor:'#121212',
+    androidPickerContainer:{
+        position:'absolute',
+        left:34,
+        top:143,
+        width:52,
+        height:40,
+        backgroundColor:'#fff',
         borderWidth:1,
-        borderRadius:10
+        borderRadius:15,
+        borderColor:'#ddd'
     },
-    doneText:{
-        textAlign:'center',
-        fontSize:14
-    }
+
+
 })
+

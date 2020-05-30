@@ -2,6 +2,9 @@
   "expo": {
     "name": "mael",
     "slug": "mael",
+    "facebookScheme": "fb2811457995640492",
+    "facebookAppId": "2811457995640492", 
+    "facebookDisplayName": "Mael streaming Test",
     "privacy": "public",
     "sdkVersion": "36.0.0",
     "platforms": [
@@ -9,7 +12,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -28,6 +31,12 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.mael.megatream",
       "buildNumber": "1.0.0",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId":"com.googleusercontent.apps.140509882075-jkh19n4anp1ip5l736u6sh0q5022ckq0"
+        }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"

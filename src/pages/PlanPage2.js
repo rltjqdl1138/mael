@@ -55,8 +55,8 @@ export default class PlanPage2 extends Component {
         this.props.navigator.pop('PaymentPage')
     }
     handleConfirm = async ()=>{
-        const {card} = this.state
-
+        const {card, plan} = this.state
+        const {navigator} = this.props
         switch(true){
             case card.isRegistered:
                 break;
@@ -92,6 +92,7 @@ export default class PlanPage2 extends Component {
         }
         this.handleChange('isLoaded', false)
 
+
         const cardNumber =
             card.num.slice(0,4) + '-' +
             card.num.slice(4,8) + '-' +
@@ -105,15 +106,23 @@ export default class PlanPage2 extends Component {
             birth: card.birth,
             password: card.password
         }
-        console.warn(this.state.plan)
-        return;
-        const response = await networkHandler.account.registerCredit(this.props.token, payload)
-        return response.success ? this.handleChange('notice', '올바르지 않은 카드 정보입니다.') :
-            this.setState(state=>({
-                ...state,
-                notice:'',
-                isLoaded:true
-            }))
+
+        let response = card.isRegistered ? {success:true, card} : await networkHandler.account.registerCredit(this.props.token, payload)
+        if(!response.success)
+            switch(response.code){
+                case 1:
+                default:
+                    return this.handleChange('notice', '올바르지 않은 카드 정보입니다.')
+            }
+        
+        else if(!plan)
+            return navigator.pop('PlanPage2')
+
+        const payld = {
+            planID: plan.ID,
+            cardID: response.card.ID
+        }
+        response = await networkHandler.account.registerCredit(this.props.token, payld)
     }
     render(){
         const {navigator} = this.props
